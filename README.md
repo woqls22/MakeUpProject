@@ -23,7 +23,8 @@
 
 ## Progress
 - Unity 상에서의 FaceRecognition 구현, Face Part별 화장 기능 구현 예정 [20.07.10]
-<img src="./Resources/FaceRecognition.PNG" width="400px">
+
+<img src= "./Resources/FaceRecognition.PNG" width="400px">
 
 ## Revision History
 - Initialize Project [20.07.11]
