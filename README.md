@@ -23,10 +23,11 @@
 
 ## Progress
 - Unity 상에서의 FaceRecognition 구현, Face Part별 화장 기능 구현 예정 [20.07.10]
+- Face LandMark 부위별 추출 완료
 
 <img src= "./Resources/FaceRecognition.png" width="400px">
-<img src= "./Resources/1.png" width="400px">
+<img src= "./Resources/1.png" width="220px">
 
 ## Revision History
 - Initialize Project [20.07.11]
-- Face Part LandMark Extraction [20.07.13]
+- Modified : Face Part LandMark Extraction  [20.07.13]
