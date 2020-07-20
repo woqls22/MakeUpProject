@@ -25,7 +25,7 @@
 - Unity 상에서의 FaceRecognition 구현, Face Part별 화장 기능 구현 예정 [20.07.10]
 - Face LandMark 부위별 추출 완료 [20.07.13]
 - 시장성 문제로 인한 프로젝트 잠정 중단[20.07.14]
-- 프로젝트 내용 변경 : AI 기반 가상 얼굴 생성, 가상얼굴로부터 Face Layer를 추출[20.07.20]
+- 프로젝트 내용 변경 : AI 기반 가상 얼굴 생성, 게임 리소스 활용을 위한 가상얼굴 추출 및 Face Layer[mouse nose eyebrow eye ...]를 추출[20.07.20]
 
  <img src= "./Resources/3.PNG" width="400px"> <img src= "./Resources/4.png" width="212px">
 
