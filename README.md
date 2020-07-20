@@ -1,8 +1,8 @@
 # MakeUpProject
-실시간 얼굴 화장 및 화장품 추천 어플리케이션 개발 [Unity PlatForm]
+게임 리소스[아바타 및 가상 인물] 생성 AI 프로젝트
 
 ## Description
-- 실시간 얼굴 화장지원, 맞춤 컨설팅 및 제품 추천 어플리케이션
+- 게임 리소스 생성을 위한 AI기반 가상 얼굴 생성 및 Face Layer 추출
 ### Function
 ```
 - 실시간 Face Make Up. 사용자가 마음에 드는 화장을 고를 시, 해당 화장에 맞는 제품 추천
