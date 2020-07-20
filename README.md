@@ -26,8 +26,8 @@
 - Face LandMark 부위별 추출 완료 [20.07.13]
 - 시장성 문제로 인한 프로젝트 잠정 중단[20.07.14]
 - 프로젝트 내용 변경 : AI 기반 가상 얼굴 생성, 가상얼굴로부터 Face Layer를 추출[20.07.20]
-<img src= "./Resources/FaceRecognition.png" width="400px">
-<img src= "./Resources/1.png" width="220px">
+
+<img src= "./Resources/3.png" width="400px"> <img src= "./Resources/2.png" width="212px">
 
 ## Revision History
 - Initialize Project [20.07.11]
