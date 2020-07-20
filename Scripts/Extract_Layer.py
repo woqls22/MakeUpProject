@@ -1,31 +1,23 @@
-import cv2, dlib, sys
+import cv2
+import dlib, sys
 import numpy as np
-from PIL import Image
+
 import Util as U
 scaler = 0.5
 
 # initialize face detector and shape predictor
 detector = dlib.get_frontal_face_detector()
 predictor = dlib.shape_predictor('shape_predictor_68_face_landmarks.dat')
-version="1.0"
-
-# load video
-#cap = cv2.VideoCapture('./sample.png')
-# load overlay image
-#overlay = cv2.imread('samples/ryan_transparent.png', cv2.IMREAD_UNCHANGED)
-
+version="2.0"
 
 face_roi = []
 face_sizes = []
+#TestPic, sample.png
+Image_name = './TestPic.png'
+
 # loop
 while True:
-  # read frame buffer from video
-  #ret, img = cap.read()
-  #if not ret:
-  #break
-  img = cv2.imread('./test.png')
-  # resize frame
-  #img = cv2.resize(img, (int(img.shape[1] * scaler), int(img.shape[0] * scaler)))
+  img = cv2.imread(Image_name)
   ori = img.copy()
   MS_ori = img.copy()
   LE_ori = img.copy()
@@ -43,9 +35,6 @@ while True:
     roi_img = img[face_roi[0]:face_roi[1], face_roi[2]:face_roi[3]]
     # cv2.imshow('roi', roi_img)
     faces = detector(roi_img)
-
-  # no faces
-
 
   # find facial landmarks
   for face in faces:
@@ -65,7 +54,7 @@ while True:
     right_eyes_brow=[]
     for s in shape_2d:
       ## 얼굴 각 부위를 Array에 넣음.
-      if(point_number>=48): ## Mouse Part
+      if(point_number>=48 and point_number<=59): ## Mouse Part
         cv2.circle(img, center=tuple(s), radius=1, color=(255, 0, 0), thickness=2, lineType=cv2.LINE_AA)
         mouse.append(s)
       elif(point_number>=36and point_number<=41): #right_eyes Part
@@ -87,12 +76,15 @@ while True:
         cv2.circle(img, center=tuple(s), radius=1, color=(255, 255, 255), thickness=2, lineType=cv2.LINE_AA)
         right_eyes_brow.append(s)
       else:
-        print("EXCEPT")
+        cv2.circle(img, center=tuple(s), radius=1, color=(0, 0, 0), thickness=2, lineType=cv2.LINE_AA)
+
+        print(left_eyes_brow)
       point_number = point_number+1
-    #draw_line(ori, list(mouse))
+    #U.draw_line(img, list(face_line))
     # compute face center
     center_x, center_y = np.mean(shape_2d, axis=0).astype(np.int)
-
+    # 눈썹, 눈, 입 제거
+    U.erase_layer(FL_ori,version, left_eyes_brow, right_eyes_brow, left_eyes, right_eyes, mouse)
     # compute face boundaries
     min_coords = np.min(shape_2d, axis=0)
     max_coords = np.max(shape_2d, axis=0)
@@ -111,7 +103,7 @@ while True:
     # compute face roi
     face_roi = np.array([int(min_coords[1] - face_size / 2), int(max_coords[1] + face_size / 2), int(min_coords[0] - face_size / 2), int(max_coords[0] + face_size / 2)])
     face_roi = np.clip(face_roi, 0, 10000)
-
+    # 이미지별 저장
     mouse_img = U.extract_part(MS_ori,mouse)
     left_eyes_img = U.extract_eye_part(LE_ori,left_eyes)
     right_eyes_img = U.extract_eye_part(RE_ori, right_eyes)
@@ -119,26 +111,48 @@ while True:
     face_line_img = U.extract_face_part(FL_ori, face_line)
     left_eyes_brow_img = U.extract_part(LEB_ori, left_eyes_brow)
     right_eyes_brow_img = U.extract_part(REB_ori, right_eyes_brow)
+    
   # visualize
-  cv2.imshow('original', ori)
-  cv2.imshow('facial landmarks', img)
-  cv2.imwrite('./FacePart/mouse'+version+'.png',mouse_img )
+
+  # Img Write
+  cv2.imwrite('./FacePart/mouse'+version+'.png',mouse_img)
   cv2.imwrite('./FacePart/left_eyes_img'+version+'.png', left_eyes_img )
   cv2.imwrite('./FacePart/right_eyes_img'+version+'.png', right_eyes_img )
   cv2.imwrite('./FacePart/nose_img'+version+'.png', nose_img )
-  cv2.imwrite('./FacePart/face_line_img'+version+'.png', face_line_img )
+  cv2.imwrite('./FacePart/face_line_img'+version+'.png', face_line_img)
+
   cv2.imwrite('./FacePart/left_eyes_brow_img'+version+'.png', left_eyes_brow_img )
   cv2.imwrite('./FacePart/right_eyes_brow_img'+version+'.png', right_eyes_brow_img )
-  #def get_face_layer(imgname, mouse, left_eyes,right_eyes,nose,face_line,left_eyes_brow,right_eyes_brow):
-  #get_face_layer('./FacePart/face_line_img.png', mouse, left_eyes, right_eyes, nose, face_line, left_eyes_brow, right_eyes_brow)
   U.get_rid_of_background('./FacePart/mouse'+version+'.png')
   U.get_rid_of_background('./FacePart/left_eyes_img'+version+'.png')
   U.get_rid_of_background('./FacePart/right_eyes_img'+version+'.png')
   U.get_rid_of_background('./FacePart/nose_img'+version+'.png')
-  U.get_rid_of_face_background('./FacePart/face_line_img'+version+'.png')
+
+
+
+  x = []
+  y = []
+  for i in range(len(face_line)):
+    x.append(face_line[0:len(face_line)][i][0])
+    y.append(face_line[0:len(face_line)][i][1])
+  minX = x[5]
+  maxX = x[11]
+  minY = min(y)
+  maxY = 0
+  nose_x= []
+  nose_y = []
+  for i in range(len(nose)):
+    nose_x.append(nose[0:len(nose)][i][0])
+    nose_y.append(nose[0:len(nose)][i][1])
+
+  U.get_rid_of_face_background('./FacePart/face_line_img'+version+'.png', minX,maxX,maxY)
+  U.postprocess_face_layer('./FacePart/face_line_img'+version+'.png', nose_x, nose_y)
   U.get_rid_of_background('./FacePart/left_eyes_brow_img'+version+'.png')
   U.get_rid_of_background('./FacePart/right_eyes_brow_img'+version+'.png')
-
+  #cv2.imshow('original', ori)
+  cv2.imshow('facial landmarks', img)
+  face_cover = cv2.imread('./FacePart/face_line_img'+version+'.png')
+  cv2.imshow('faceLayer', face_cover)
   print("Extraction Face Part Complete")
   #cv2.imwrite('q./result.png',img)
 
