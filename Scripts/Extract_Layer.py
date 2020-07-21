@@ -26,7 +26,7 @@ while True:
   FL_ori = img.copy()
   LEB_ori = img.copy()
   REB_ori = img.copy()
-
+  cheek_ori = img.copy()
 
   # find faces
   if len(face_roi) == 0:
@@ -52,29 +52,66 @@ while True:
     face_line = []
     left_eyes_brow=[]
     right_eyes_brow=[]
+    points_for_leftcheek = []
+    points_for_rightcheek = []
     for s in shape_2d:
       ## 얼굴 각 부위를 Array에 넣음.
       if(point_number>=48 and point_number<=59): ## Mouse Part
         cv2.circle(img, center=tuple(s), radius=1, color=(255, 0, 0), thickness=2, lineType=cv2.LINE_AA)
+        if(point_number==49): #left cheek points
+          cv2.circle(img, center=tuple(s), radius=1, color=(0, 0, 255), thickness=2, lineType=cv2.LINE_AA)
+          points_for_leftcheek.append(s)
+
+        if(point_number==53): #right cheek points
+          cv2.circle(img, center=tuple(s), radius=1, color=(0, 0, 255), thickness=2, lineType=cv2.LINE_AA)
+          points_for_rightcheek.append(s)
+
         mouse.append(s)
-      elif(point_number>=36and point_number<=41): #right_eyes Part
+
+      elif(point_number>=36and point_number<=39): #left Abobe Part
         cv2.circle(img, center=tuple(s), radius=1, color=(255, 255, 0), thickness=2, lineType=cv2.LINE_AA)
-        right_eyes.append(s)
-      elif (point_number >= 42 and point_number <= 47):  # left_eyes Part
-        cv2.circle(img, center=tuple(s), radius=1, color=(30, 255, 54), thickness=2, lineType=cv2.LINE_AA)
+
+        if (point_number == 39):  # left cheek points
+          cv2.circle(img, center=tuple(s), radius=1, color=(0, 0, 255), thickness=2, lineType=cv2.LINE_AA)
+          points_for_leftcheek.append(s)
         left_eyes.append(s)
+      elif (point_number >= 40 and point_number <= 41):  # left_eyes below Part
+        cv2.circle(img, center=tuple(s), radius=1, color=(255, 255, 0), thickness=2, lineType=cv2.LINE_AA)
+        left_eyes.append(s)
+
+      elif (point_number >= 42 and point_number <= 45):  # righteyes Abobe Part
+        cv2.circle(img, center=tuple(s), radius=1, color=(30, 255, 54), thickness=2, lineType=cv2.LINE_AA)
+        if (point_number == 42):  # right cheek points
+          cv2.circle(img, center=tuple(s), radius=1, color=(255, 0, 0), thickness=2, lineType=cv2.LINE_AA)
+          points_for_rightcheek.append(s)
+        right_eyes.append(s)
+
+      elif (point_number >= 46 and point_number <= 47):  # righteyes Below Part
+        cv2.circle(img, center=tuple(s), radius=1, color=(30, 255, 54), thickness=2, lineType=cv2.LINE_AA)
+        right_eyes.append(s)
+
       elif(point_number>=27 and point_number<=35): # nose Part
         cv2.circle(img, center=tuple(s), radius=1, color=(140, 0, 255), thickness=2, lineType=cv2.LINE_AA)
         nose.append(s)
+
       elif(point_number>=0 and point_number<=16):#face_line Part
         cv2.circle(img, center=tuple(s), radius=1, color=(175, 255, 130), thickness=2, lineType=cv2.LINE_AA)
         face_line.append(s)
+        if(point_number==1  or point_number==4): #왼쪽뺨 볼터치 레이어 point
+          cv2.circle(img, center=tuple(s), radius=1, color=(0, 0, 255), thickness=2, lineType=cv2.LINE_AA)
+          points_for_leftcheek.append(s)
+        if(point_number==12 or point_number==15): #오른쪽 뺨 볼터치 레이어 point
+          cv2.circle(img, center=tuple(s), radius=1, color=(0, 0, 255), thickness=2, lineType=cv2.LINE_AA)
+          points_for_rightcheek.append(s)
+
       elif (point_number >= 17 and point_number <= 21):  # left_eyes_brow Part
         cv2.circle(img, center=tuple(s), radius=1, color=(170, 170, 170), thickness=2, lineType=cv2.LINE_AA)
         left_eyes_brow.append(s)
+
       elif (point_number >= 22 and point_number <= 26):  # right_eyes_brow Part
         cv2.circle(img, center=tuple(s), radius=1, color=(255, 255, 255), thickness=2, lineType=cv2.LINE_AA)
         right_eyes_brow.append(s)
+
       else:
         cv2.circle(img, center=tuple(s), radius=1, color=(0, 0, 0), thickness=2, lineType=cv2.LINE_AA)
 
@@ -113,7 +150,8 @@ while True:
     right_eyes_brow_img = U.extract_part(REB_ori, right_eyes_brow)
     
   # visualize
-
+  U.get_cheek_layer(cheek_ori, points_for_leftcheek, points_for_rightcheek)
+  cv2.imshow('cheektest', cheek_ori)
   # Img Write
   cv2.imwrite('./FacePart/mouse'+version+'.png',mouse_img)
   cv2.imwrite('./FacePart/left_eyes_img'+version+'.png', left_eyes_img )
@@ -127,7 +165,6 @@ while True:
   U.get_rid_of_background('./FacePart/left_eyes_img'+version+'.png')
   U.get_rid_of_background('./FacePart/right_eyes_img'+version+'.png')
   U.get_rid_of_background('./FacePart/nose_img'+version+'.png')
-
 
 
   x = []

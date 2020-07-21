@@ -2,7 +2,7 @@ import dlib, sys
 import cv2
 import numpy as np
 from PIL import Image
-MAKE_TRANSPARENT = True
+MAKE_TRANSPARENT = False
 
 def draw_line(img, L):
   for i in range(len(L)-1):
@@ -270,4 +270,44 @@ def get_rid_of_background(imgname):
     opencv_img = cv2.imread(imgname)
     cv2.GaussianBlur(opencv_img, (3,3),0)
     cv2.imwrite(imgname, opencv_img)
+def get_cheek_layer(cheek_ori, left_cheekpoint, right_cheekpoint):
+  Lx, Ly = GetIntersetLeftPoints2D(left_cheekpoint)
+  Rx, Ry = GetIntersetRightPoints2D(right_cheekpoint)
+  print(left_cheekpoint)
+  width = int((left_cheekpoint[1][0]-left_cheekpoint[0][0])*1.3)
+  height = int((left_cheekpoint[1][1]-left_cheekpoint[0][1])*0.5)
+
+  cv2.line(cheek_ori, (Lx,Ly), (Lx,Ly), (0,0,0),5)
+  cv2.line(cheek_ori, (Rx,Ry), (Rx,Ry), (0,0,0),5)
+  cv2.ellipse(cheek_ori,(Lx,Ly), (width,height), -35,0,360,(0,0,255),-1)
+  cv2.ellipse(cheek_ori,(Rx,Ry), (width,height), 35,0,360,(0,0,255),-1)
+
+
+def GetIntersetLeftPoints2D(L):
+  x1 = L[0][0]
+  y1 = L[0][1]
+  x2 = L[3][0]
+  y2 = L[3][1]
+  x3 = L[1][0]
+  y3 = L[1][1]
+  x4 = L[2][0]
+  y4 = L[2][1]
+  det = (((x1-x2)*(y3-y4))-((y1-y2)*(x3-x4)))
+  Px = ((((x1*y2)-(y1*x2))*(x3-x4))-((x1-x2)*((x3*y4)-(y3*x4))))/det
+  Py = ((((x1*y2)-(y1*x2))*(y3-y4))-((y1-y2)*((x3*y4)-(y3*x4))))/det
+  return int(Px),int(Py)
+def GetIntersetRightPoints2D(L):
+  x1 = L[2][0]
+  y1 = L[2][1]
+  x2 = L[0][0]
+  y2 = L[0][1]
+  x3 = L[3][0]
+  y3 = L[3][1]
+  x4 = L[1][0]
+  y4 = L[1][1]
+  det = (((x1-x2)*(y3-y4))-((y1-y2)*(x3-x4)))
+  Px = ((((x1*y2)-(y1*x2))*(x3-x4))-((x1-x2)*((x3*y4)-(y3*x4))))/det
+  Py = ((((x1*y2)-(y1*x2))*(y3-y4))-((y1-y2)*((x3*y4)-(y3*x4))))/det
+  return int(Px),int(Py)
+
 
