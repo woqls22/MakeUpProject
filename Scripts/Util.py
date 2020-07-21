@@ -2,7 +2,8 @@ import dlib, sys
 import cv2
 import numpy as np
 from PIL import Image
-MAKE_TRANSPARENT = False
+import random
+MAKE_TRANSPARENT = True
 
 def draw_line(img, L):
   for i in range(len(L)-1):
@@ -270,19 +271,75 @@ def get_rid_of_background(imgname):
     opencv_img = cv2.imread(imgname)
     cv2.GaussianBlur(opencv_img, (3,3),0)
     cv2.imwrite(imgname, opencv_img)
-def get_cheek_layer(cheek_ori, left_cheekpoint, right_cheekpoint):
+
+def get_cheek_layer(cheek_ori, left_cheekpoint, right_cheekpoint, face_line, nose):
   Lx, Ly = GetIntersetLeftPoints2D(left_cheekpoint)
   Rx, Ry = GetIntersetRightPoints2D(right_cheekpoint)
-  print(left_cheekpoint)
-  width = int((left_cheekpoint[1][0]-left_cheekpoint[0][0])*1.3)
-  height = int((left_cheekpoint[1][1]-left_cheekpoint[0][1])*0.5)
-
+  Left_facedot = []
+  Right_facedot = []
   cv2.line(cheek_ori, (Lx,Ly), (Lx,Ly), (0,0,0),5)
   cv2.line(cheek_ori, (Rx,Ry), (Rx,Ry), (0,0,0),5)
-  cv2.ellipse(cheek_ori,(Lx,Ly), (width,height), -35,0,360,(0,0,255),-1)
-  cv2.ellipse(cheek_ori,(Rx,Ry), (width,height), 35,0,360,(0,0,255),-1)
+  i = 0
+  Left_facedot.append([Lx,Ly])
+  Right_facedot.append([Rx, Ry])
+  oval_1=[]
+  oval_2=[]
+  for elem in face_line:
+    if(i>=2 and i<=5 and i is not 3):
+      Left_facedot.append(get_center_point(face_line[i-1],face_line[i]))
+      Left_facedot.append(elem)
+    if(i==3):
+      Left_facedot.append(get_center_point(face_line[i-1],face_line[i]))
+      Left_facedot.append(elem)
+      oval_1.append(elem)
+    if(i>=12 and i<=15 and i is not 3):
+      Right_facedot.append(get_center_point(face_line[i-1],face_line[i]))
+      Right_facedot.append(elem)
+    if(i==13):
+      Right_facedot.append(get_center_point(face_line[i-1],face_line[i]))
+      Right_facedot.append(elem)
+      oval_2.append(elem)
+    i= i+1
+  points1 = np.array(Left_facedot, np.int32)
+  points2 = np.array(Right_facedot, np.int32)
+  width = int((left_cheekpoint[1][0] - left_cheekpoint[0][0]) * 0.9)
+  Lwidth = int((left_cheekpoint[1][0]-left_cheekpoint[0][0])*0.76)
+  Rwidth = int((left_cheekpoint[1][0] - left_cheekpoint[0][0]) * 0.85)
+  height = int((left_cheekpoint[1][1]-left_cheekpoint[0][1])*0.5)
+  for i in range(0,len(points1)):
+    cv2.ellipse(cheek_ori, tuple(get_center_point(points1[i], [Lx,Ly])), (Lwidth, height), -15, 0, 360, (0, 0, 255), -1)
+  for i in range(0, len(points2)):
+    cv2.ellipse(cheek_ori, tuple(get_center_point(points2[i], [Rx, Ry])), (Rwidth, height), 15, 0, 360, (0, 0, 255), -1)
+  cheek_ori = cv2.fillConvexPoly(cheek_ori, points1,(0,0,255))
+  cheek_ori = cv2.fillConvexPoly(cheek_ori, points2, (0,0,255))
+  width = int(width*1.2)
+  height= int(height*1.5)
+  Lx = int(Lx-width*0.3)
+  Rx = int(Rx+width*0.3)
+  cv2.ellipse(cheek_ori, (Lx, Ly), (width, height), -20, 0, 360, (0, 0, 255), -1)
+  cv2.ellipse(cheek_ori, (Rx, Ry), (width, height), 20, 0, 360, (0, 0, 255), -1)
+  imgn = "CheekLayer.png"
+  cv2.imwrite(imgn, cheek_ori)
+  if (MAKE_TRANSPARENT):
+    img = Image.open(imgn)
+    img = img.convert("RGBA")
+    datas = img.getdata()
+    newData = []
+    for item in datas:
+      if (item[0]==255 and item[1]== 0 and item[2] == 0):
+        newData.append(item)
+      else:
+        newData.append((255, 255, 255, 0))
 
+    img.putdata(newData)
+    imgname = "./FacePart/CheekLayer.png"
+    print("Cheek Layer Extract [Path] : " + imgname)
+    img.save(imgname, "PNG")
 
+def get_center_point(P1,P2):
+  x1 = int((P1[0]+P2[0])/2)
+  y1 = int((P1[1]+P2[1])/2)
+  return [x1,y1]
 def GetIntersetLeftPoints2D(L):
   x1 = L[0][0]
   y1 = L[0][1]
@@ -296,6 +353,7 @@ def GetIntersetLeftPoints2D(L):
   Px = ((((x1*y2)-(y1*x2))*(x3-x4))-((x1-x2)*((x3*y4)-(y3*x4))))/det
   Py = ((((x1*y2)-(y1*x2))*(y3-y4))-((y1-y2)*((x3*y4)-(y3*x4))))/det
   return int(Px),int(Py)
+
 def GetIntersetRightPoints2D(L):
   x1 = L[2][0]
   y1 = L[2][1]
@@ -310,4 +368,8 @@ def GetIntersetRightPoints2D(L):
   Py = ((((x1*y2)-(y1*x2))*(y3-y4))-((y1-y2)*((x3*y4)-(y3*x4))))/det
   return int(Px),int(Py)
 
-
+def get_curve(Set):
+  Set = list(Set)
+  for i in range(1,len(Set)):
+    Set.append(get_center_point(Set[i-1], Set[i]))
+  return np.array(Set, np.int32)

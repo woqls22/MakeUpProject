@@ -12,8 +12,8 @@ version="2.0"
 
 face_roi = []
 face_sizes = []
-#TestPic, sample.png
-Image_name = './TestPic.png'
+#TestPic,test3, test2, test1 sample.png
+Image_name = './test3.png'
 
 # loop
 while True:
@@ -54,6 +54,7 @@ while True:
     right_eyes_brow=[]
     points_for_leftcheek = []
     points_for_rightcheek = []
+    points_for_nosecheek=[]
     for s in shape_2d:
       ## 얼굴 각 부위를 Array에 넣음.
       if(point_number>=48 and point_number<=59): ## Mouse Part
@@ -89,11 +90,16 @@ while True:
       elif (point_number >= 46 and point_number <= 47):  # righteyes Below Part
         cv2.circle(img, center=tuple(s), radius=1, color=(30, 255, 54), thickness=2, lineType=cv2.LINE_AA)
         right_eyes.append(s)
-
-      elif(point_number>=27 and point_number<=35): # nose Part
+      elif (point_number == 27):  # nose Part
+        cv2.circle(img, center=tuple(s), radius=1, color=(140, 0, 255), thickness=2, lineType=cv2.LINE_AA)
+        points_for_nosecheek.append(s)
+        nose.append(s)
+      elif(point_number>=28 and point_number<=30): # nose Part
         cv2.circle(img, center=tuple(s), radius=1, color=(140, 0, 255), thickness=2, lineType=cv2.LINE_AA)
         nose.append(s)
-
+      elif(point_number>=31 and point_number<=35): # nose Part
+        cv2.circle(img, center=tuple(s), radius=1, color=(140, 0, 255), thickness=2, lineType=cv2.LINE_AA)
+        nose.append(s)
       elif(point_number>=0 and point_number<=16):#face_line Part
         cv2.circle(img, center=tuple(s), radius=1, color=(175, 255, 130), thickness=2, lineType=cv2.LINE_AA)
         face_line.append(s)
@@ -148,9 +154,9 @@ while True:
     face_line_img = U.extract_face_part(FL_ori, face_line)
     left_eyes_brow_img = U.extract_part(LEB_ori, left_eyes_brow)
     right_eyes_brow_img = U.extract_part(REB_ori, right_eyes_brow)
-    
+
   # visualize
-  U.get_cheek_layer(cheek_ori, points_for_leftcheek, points_for_rightcheek)
+  U.get_cheek_layer(cheek_ori, points_for_leftcheek, points_for_rightcheek, face_line,points_for_nosecheek)
   cv2.imshow('cheektest', cheek_ori)
   # Img Write
   cv2.imwrite('./FacePart/mouse'+version+'.png',mouse_img)
