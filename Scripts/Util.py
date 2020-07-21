@@ -220,6 +220,7 @@ def is_in_Area(x,y,minX,maxX,minY,maxY):
 
 def erase_layer(img,version, left_eyes_brow, right_eyes_brow, left_eyes, right_eyes, mouse):
   # PreProcessing
+
   if (MAKE_TRANSPARENT):
     cvImg = img
     #points1 = np.array(left_eyes_brow, np.int32)
@@ -236,41 +237,6 @@ def erase_layer(img,version, left_eyes_brow, right_eyes_brow, left_eyes, right_e
     #cv2.imshow('test', cvImg)
 
 
-
-def get_rid_of_background(imgname):
-  # 회색 계열 : R 146 G 141 B 141
-  # 회색 계열 : R 218 G 216 B 216
-  # 회색 계열 : R 203 G 200 B 200
-  # 회색 계열 : R 233 G 232 B 231
-  # 살색 계열 : R 229 G 190 B 182
-  # 살색 계열 : R 207 G 165 B 159
-  if(MAKE_TRANSPARENT):
-    img = Image.open(imgname)
-    img = img.convert("RGBA")
-    datas = img.getdata()
-    opencv_img = cv2.imread(imgname)
-    opencv_img = cv2.cvtColor(opencv_img, cv2.COLOR_BGR2RGB)
-    color = [229,190,182]
-
-    newData = []
-    red_mask = 50
-    mask_interval = 130
-    for item in datas:
-      #print("{0}, {1}, {2}".format(item[0],item[1],item[2]))
-      #print("{0}, {1}, {2}".format(color[0],color[1],color[2]))
-      #print("========================")
-      if ((item[0] <= color[0]+red_mask and item[0]>color[0]-red_mask) and (item[1] <= color[1]+mask_interval and item[1]>color[1]-mask_interval) and (item[2] <= color[2]+mask_interval and item[2]>color[2]-mask_interval)):
-        newData.append((255, 255, 255, 0))
-      elif(abs(item[0]-item[1])<20 and abs(item[1]-item[2])<20 and abs(item[2]-item[0])<20):
-        newData.append((255, 255, 255, 0))
-      else:
-        newData.append(item)
-
-    img.putdata(newData)
-    img.save(imgname, "PNG")
-    opencv_img = cv2.imread(imgname)
-    cv2.GaussianBlur(opencv_img, (3,3),0)
-    cv2.imwrite(imgname, opencv_img)
 
 def get_cheek_layer(cheek_ori, left_cheekpoint, right_cheekpoint, face_line, nose):
   Lx, Ly = GetIntersetLeftPoints2D(left_cheekpoint)
@@ -373,3 +339,134 @@ def get_curve(Set):
   for i in range(1,len(Set)):
     Set.append(get_center_point(Set[i-1], Set[i]))
   return np.array(Set, np.int32)
+
+def get_lip_layer(imgname, mouse):
+  x = -1
+  y = 0
+  x_list=[]
+  y_list=[]
+  for i in mouse:
+    x_list.append(i[0])
+    y_list.append(i[1])
+  min_x = min(x_list)-5
+  max_x = max(x_list)+5
+  min_y = min(y_list)-3
+  max_y = max(y_list)+5
+  if(MAKE_TRANSPARENT):
+    img = Image.open(imgname)
+    img = img.convert("RGBA")
+    datas = img.getdata()
+    opencv_img = cv2.imread(imgname)
+    opencv_img = cv2.cvtColor(opencv_img, cv2.COLOR_BGR2RGB)
+    width = opencv_img.shape[1]
+    height = opencv_img.shape[0]
+    newData = []
+    x = -1
+    y = 0
+    print(min_x,max_x,min_y,max_y)
+    center_x = int((min_x+max_x)/2)
+    center_y = int((min_y + max_y) / 2)
+    #내부 : 223 99 96
+    #중간지점 : 231 145 145
+    #최외곽 : 234 186 185
+    centerLip_color = opencv_img[center_y,center_x]
+    print(centerLip_color)
+    for item in datas:
+      if(is_in_Area(x,y,min_x,max_x,min_y,max_y) and Lip_Similar_with_point(centerLip_color, item)):
+        newData.append(item)
+      else:
+        newData.append((255,255,255,0))
+      x = x + 1
+      if (x >= width):
+        y = y + 1
+        x = 0
+
+    img.putdata(newData)
+    imgname = "./FacePart/lip_layer.png"
+    img.save(imgname, "PNG")
+def get_eyebrow_layer(imgname, lefteyebrow, righteyebrow):
+  x = -1
+  y = 0
+  l_x_list=[]
+  l_y_list=[]
+  for i in lefteyebrow:
+    l_x_list.append(i[0])
+    l_y_list.append(i[1])
+  lefteyebrowmin_x = min(l_x_list)-5
+  lefteyebrowmax_x = max(l_x_list)+5
+  lefteyebrowmin_y = min(l_y_list)-3
+  lefteyebrowmax_y = max(l_y_list)+5
+
+  r_x_list = []
+  r_y_list = []
+  for i in righteyebrow:
+    r_x_list.append(i[0])
+    r_y_list.append(i[1])
+  righteyebrowmin_x = min(r_x_list) - 5
+  righteyebrowmax_x = max(r_x_list) + 5
+  righteyebrowmin_y = min(r_y_list) - 3
+  righteyebrowmax_y = max(r_y_list) + 5
+  if(MAKE_TRANSPARENT):
+    img = Image.open(imgname)
+    img = img.convert("RGBA")
+    datas = img.getdata()
+    opencv_img = cv2.imread(imgname)
+    opencv_img = cv2.cvtColor(opencv_img, cv2.COLOR_BGR2RGB)
+    width = opencv_img.shape[1]
+    height = opencv_img.shape[0]
+    newData = []
+    x = -1
+    y = 0
+    l_center_x = int((lefteyebrowmin_x + lefteyebrowmax_x)/2)
+    l_center_y = int((lefteyebrowmin_y + lefteyebrowmax_y) / 2)
+    left_center_eyebrow_color = opencv_img[l_center_y,l_center_x]
+
+    center_x = int((righteyebrowmin_x+righteyebrowmax_x)/2)
+    center_y = int((righteyebrowmin_y + righteyebrowmax_y) / 2)
+    right_center_eyebrow_color = opencv_img[center_y,center_x]
+
+    print(left_center_eyebrow_color)
+    print(right_center_eyebrow_color)
+    for item in datas:
+      if((is_in_Area(x,y,lefteyebrowmin_x,lefteyebrowmax_x,lefteyebrowmin_y,lefteyebrowmax_y) and Eyebrow_Similar_with_point(left_center_eyebrow_color, item))):
+        newData.append(item)
+      elif((is_in_Area(x, y, righteyebrowmin_x, righteyebrowmax_x, righteyebrowmin_y, righteyebrowmax_y) and (Eyebrow_Similar_with_point(right_center_eyebrow_color, item)))):
+        newData.append(item)
+      else:
+        newData.append((255,255,255,0))
+      x = x + 1
+      if (x >= width):
+        y = y + 1
+        x = 0
+    img.putdata(newData)
+    imgname = "./FacePart/eyebrow.png"
+    img.save(imgname, "PNG")
+def Lip_Similar_with_point(source_color, compare_obj):
+   red_confidence = 20
+   confidence = 100
+   sorce_r = source_color[0]
+   sorce_g = source_color[1]
+   sorce_b = source_color[2]
+   obj_r = compare_obj[0]
+   obj_g = compare_obj[1]
+   obj_b = compare_obj[2]
+   if(abs(sorce_r - obj_r)<red_confidence and abs(sorce_g - obj_g)<confidence):
+     return True
+   if(abs(sorce_r - obj_r)<red_confidence and abs(sorce_b - obj_b)<confidence):
+     return True
+   return False
+def Eyebrow_Similar_with_point(source_color, compare_obj):
+  red_confidence = 23
+  confidence = 100
+  sorce_r = source_color[0]
+  sorce_g = source_color[1]
+  sorce_b = source_color[2]
+  obj_r = compare_obj[0]
+  obj_g = compare_obj[1]
+  obj_b = compare_obj[2]
+  if (abs(sorce_r - obj_r) < red_confidence and abs(sorce_g - obj_g) < confidence):
+    return True
+  if (abs(sorce_r - obj_r) < red_confidence and abs(sorce_b - obj_b) < confidence):
+    return True
+  return False
+

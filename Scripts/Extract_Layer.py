@@ -13,7 +13,7 @@ version="2.0"
 face_roi = []
 face_sizes = []
 #TestPic,test3, test2, test1 sample.png
-Image_name = './test3.png'
+Image_name = './sample.png'
 
 # loop
 while True:
@@ -59,6 +59,7 @@ while True:
       ## 얼굴 각 부위를 Array에 넣음.
       if(point_number>=48 and point_number<=59): ## Mouse Part
         cv2.circle(img, center=tuple(s), radius=1, color=(255, 0, 0), thickness=2, lineType=cv2.LINE_AA)
+        mouse.append(s)
         if(point_number==49): #left cheek points
           cv2.circle(img, center=tuple(s), radius=1, color=(0, 0, 255), thickness=2, lineType=cv2.LINE_AA)
           points_for_leftcheek.append(s)
@@ -67,7 +68,6 @@ while True:
           cv2.circle(img, center=tuple(s), radius=1, color=(0, 0, 255), thickness=2, lineType=cv2.LINE_AA)
           points_for_rightcheek.append(s)
 
-        mouse.append(s)
 
       elif(point_number>=36and point_number<=39): #left Abobe Part
         cv2.circle(img, center=tuple(s), radius=1, color=(255, 255, 0), thickness=2, lineType=cv2.LINE_AA)
@@ -167,10 +167,10 @@ while True:
 
   cv2.imwrite('./FacePart/left_eyes_brow_img'+version+'.png', left_eyes_brow_img )
   cv2.imwrite('./FacePart/right_eyes_brow_img'+version+'.png', right_eyes_brow_img )
-  U.get_rid_of_background('./FacePart/mouse'+version+'.png')
-  U.get_rid_of_background('./FacePart/left_eyes_img'+version+'.png')
-  U.get_rid_of_background('./FacePart/right_eyes_img'+version+'.png')
-  U.get_rid_of_background('./FacePart/nose_img'+version+'.png')
+
+  U.get_lip_layer(Image_name,mouse)
+  U.get_eyebrow_layer(Image_name, left_eyes_brow, right_eyes_brow)
+
 
 
   x = []
@@ -190,8 +190,8 @@ while True:
 
   U.get_rid_of_face_background('./FacePart/face_line_img'+version+'.png', minX,maxX,maxY)
   U.postprocess_face_layer('./FacePart/face_line_img'+version+'.png', nose_x, nose_y)
-  U.get_rid_of_background('./FacePart/left_eyes_brow_img'+version+'.png')
-  U.get_rid_of_background('./FacePart/right_eyes_brow_img'+version+'.png')
+  #U.get_rid_of_background('./FacePart/left_eyes_brow_img'+version+'.png')
+  #U.get_rid_of_background('./FacePart/right_eyes_brow_img'+version+'.png')
   #cv2.imshow('original', ori)
   cv2.imshow('facial landmarks', img)
   face_cover = cv2.imread('./FacePart/face_line_img'+version+'.png')
