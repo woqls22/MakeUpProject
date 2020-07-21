@@ -30,9 +30,9 @@
 
  <img src= "./Resources/3.PNG" width="400px"> <img src= "./Resources/4.png" width="212px">
 
-  <img src= "./Resources/6.png" width="335px"> <img src= "./Resources/5.PNG" width="212px">
+ <img src= "./Resources/5.PNG" width="212px"> <img src= "./Resources/CheekLayer.png" width="310px">
 
 ## Revision History
 - Initialize Project [20.07.11]
 - Modified : Face Part LandMark Extraction  [20.07.13]
-- Modified : Face Layer Extraction Module [20.07.20]
+- Added : Face Layer Extraction Module [20.07.20]
