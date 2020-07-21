@@ -30,8 +30,7 @@
 
  <img src= "./Resources/3.PNG" width="400px"> <img src= "./Resources/4.png" width="212px">
 
-  <img src= "./Resources/6.png" width="335px">
-   <img src= "./Resources/5.PNG" width="212px">
+  <img src= "./Resources/6.png" width="335px"> <img src= "./Resources/5.PNG" width="212px">
 
 ## Revision History
 - Initialize Project [20.07.11]
