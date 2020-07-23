@@ -24,12 +24,20 @@
 - 프로젝트 내용 변경 : AI 기반 가상 얼굴 생성, 게임 리소스 활용을 위한 가상얼굴 추출 및 Face Layer[mouse eyebrow eye ...]를 추출[20.07.20]
 - Face Layer, Cheek Layer, eyebrow Layer추출 구현[20.07.21]
 - 섀도우, 눈 레이어 추가, 눈썹 레이어 수정[20.07.21]
+- CartoonGAN 적용, 실사 사진 일러스트화적용 [20.07.23]
 
+#### CartoonGAN processing 전/후
+ <img src= "./Resources/21.jpg" width="212px"> <img src= "./Resources/20.jpg" width="212px">
+
+#### FaceLayer Extraction
  <img src= "./Resources/3.PNG" width="400px"> <img src= "./Resources/4.png" width="212px">
 
+#### Cheek Layer Extraction
  <img src= "./Resources/5.PNG" width="212px"> <img src= "./Resources/CheekLayer.png" width="310px">
 
+#### Eyebrow Layer Extraction
  <img src= "./Resources/sample.png" width="212px"> <img src= "./Resources/eyebrow.png" width="212px">
+
 
 ## Revision History
 - Initialize Project [20.07.11]
