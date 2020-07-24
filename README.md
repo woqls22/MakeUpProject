@@ -34,12 +34,16 @@
 
 
 ## Revision History
-- Initialize Project [20.07.11]
-- Modified : Face Part LandMark Extraction  [20.07.13]
-- Added : Face Layer Extraction Module [20.07.20]
-- Added : Eyebrow, Cheek Layer Extraction Module [20.07.21]
-- Modified : Shadow and Eye Layer, Modification Eyebrow Layer [20.07.22]
-- Added : CartoonGAN Module [20.07.23]
+- [X] Initialize Project [20.07.11]
+- [X] Modified : Face Part LandMark Extraction  [20.07.13]
+- [X] Added : Face Layer Extraction Module [20.07.20]
+- [X] Added : Eyebrow, Cheek Layer Extraction Module [20.07.21]
+- [X] Modified : Shadow and Eye Layer, Modification Eyebrow Layer [20.07.22]
+- [X] Added : CartoonGAN Module [20.07.23]
+- [ ] Clothes Layer Extraction
+- [ ] Body Layer Extraction
+- [ ] Convert 2D Pattern to 3D style
+
 
 ## Lisence
 MIT License
