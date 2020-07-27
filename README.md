@@ -41,7 +41,7 @@
 - Added : Eyebrow, Cheek Layer Extraction Module [20.07.21]
 - Modified : Shadow and Eye Layer, Modification Eyebrow Layer [20.07.22]
 - Added : CartoonGAN Module [20.07.23]
-
+- Integrated : CartoonGAN & Face Layer Extraction Module [20.07.27]
 
 ## Lisence
 MIT License
