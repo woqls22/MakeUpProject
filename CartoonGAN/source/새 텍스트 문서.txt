@@ -1,5 +1,0 @@
-python inference_with_ckpt.py \
-    --m_path ./light_shinkai_ckpt \
-    --img_path ./source/cloth.png \
-    --out_dir ./output_images/ \
-    --light
