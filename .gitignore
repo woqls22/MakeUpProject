@@ -30,3 +30,4 @@ Scripts/ShowLicense.cs
 ./light_shinkai_ckpt
 shape_predictor_68_face_landmarks.dat
 shape_predictor_194_face_landmarks.dat
+topwears.h5

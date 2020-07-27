@@ -19,9 +19,11 @@
 - [X] 섀도우, 눈 레이어 추가, 눈썹 레이어 수정[20.07.21]
 - [X] CartoonGAN 적용, 실사 사진 일러스트화적용 [20.07.23]
 - [X] CartoonGAN , Layer Extraction 모듈 통합 [20.07.27]
-- [ ] Clothes Layer Extraction
+- [X] Clothes Layer Extraction구현(상의) [20.07.27]
+- [ ] Clothes Layer Extraction구현(하의) [20.07.27]
 - [ ] Body Layer Extraction
 - [ ] Convert 2D Pattern to 3D style
+
 #### CartoonGAN processing 전/후
  <img src= "./Resources/21.jpg" width="212px"> <img src= "./Resources/20.jpg" width="212px">
 
@@ -34,6 +36,14 @@
 #### EyeBrow/EyeShadow Layer Extraction
   <img src= "./Resources/eye_layer.PNG">
 
+#### Clothes Layer Extraction [h5 Model from Anish Josh]
+  <img src= "./Resources/clothes_layer.png" width="550px">
+
+```
+- topwears.h5 model file download
+https://drive.google.com/file/d/14vTYmsHjUYv3VPo1Byrecs3NQuvJo89t/view
+```
+
 ## Revision History
 - Initialize Project [20.07.11]
 - Modified : Face Part LandMark Extraction  [20.07.13]
@@ -42,6 +52,7 @@
 - Modified : Shadow and Eye Layer, Modification Eyebrow Layer [20.07.22]
 - Added : CartoonGAN Module [20.07.23]
 - Integrated : CartoonGAN & Face Layer Extraction Module [20.07.27]
+- Added : Clothes Layer Extraction [20.07.27]
 
 ## Lisence
 MIT License
