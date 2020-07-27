@@ -32,8 +32,7 @@
  <img src= "./Resources/cheek_colored2.0.png" width="212px"> <img src= "./Resources/CheekLayer.png" width="212px">  
 
 #### EyeBrow/EyeShadow Layer Extraction
-  <img src= "./Resources/TestPic.PNG" width="212px"><img src= "./Resources/eyebrow2.0.png" width="212px"> <img src= "./Resources/eyeshadow2.0.png" width="212px">
-
+  <img src= "./Resources/eye_layer.PNG">
 
 ## Revision History
 - Initialize Project [20.07.11]
