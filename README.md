@@ -40,7 +40,8 @@
 
 #### Clothes Layer Extraction [h5 Model from Anish Josh]
   <img src= "./Resources/clothes_layer.png" width="550px">
-
+  <img src= "./Resources/out.png" width="550px">
+  
 ```
 - topwears.h5 model file download
 https://drive.google.com/file/d/14vTYmsHjUYv3VPo1Byrecs3NQuvJo89t/view
