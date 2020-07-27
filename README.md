@@ -18,6 +18,7 @@
 - [X] Face Layer, Cheek Layer, eyebrow Layer추출 구현[20.07.21]
 - [X] 섀도우, 눈 레이어 추가, 눈썹 레이어 수정[20.07.21]
 - [X] CartoonGAN 적용, 실사 사진 일러스트화적용 [20.07.23]
+- [X] CartoonGAN , Layer Extraction 모듈 통합 [20.07.27]
 - [ ] Clothes Layer Extraction
 - [ ] Body Layer Extraction
 - [ ] Convert 2D Pattern to 3D style
@@ -25,13 +26,13 @@
  <img src= "./Resources/21.jpg" width="212px"> <img src= "./Resources/20.jpg" width="212px">
 
 #### FaceLayer Extraction
- <img src= "./Resources/3.PNG" width="400px"> <img src= "./Resources/4.png" width="212px">
+ <img src= "./Resources/5.png" width="400px"> <img src= "./Resources/6.png" width="212px">
 
 #### Cheek Layer Extraction
- <img src= "./Resources/5.PNG" width="212px"> <img src= "./Resources/CheekLayer.png" width="310px">
+ <img src= "./Resources/cheek_colored2.0.png" width="212px"> <img src= "./Resources/CheekLayer.png" width="212px">  
 
-#### Eyebrow Layer Extraction
- <img src= "./Resources/sample.png" width="212px"> <img src= "./Resources/eyebrow.png" width="212px">
+#### EyeBrow/EyeShadow Layer Extraction
+  <img src= "./Resources/TestPic.PNG" width="212px"><img src= "./Resources/eyebrow2.0.png" width="212px"> <img src= "./Resources/eyeshadow2.0.png" width="212px">
 
 
 ## Revision History

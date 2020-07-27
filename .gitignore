@@ -28,3 +28,5 @@ Scripts/ShowLicense.cs
 ./shape_predictor_194_face_landmarks.dat
 ./keras_contrib
 ./light_shinkai_ckpt
+shape_predictor_68_face_landmarks.dat
+shape_predictor_194_face_landmarks.dat
