@@ -33,7 +33,7 @@
  <img src= "./Resources/5.png" width="400px"> <img src= "./Resources/6.png" width="212px">
 
 #### Cheek Layer Extraction
- <img src= "./Resources/cheek_colored2.0.png" width="212px"> <img src= "./Resources/CheekLayer.png" width="212px">  
+ <img src= "./Resources/cheek_colored2.0.png" width="530px"> 
 
 #### EyeBrow/EyeShadow Layer Extraction
   <img src= "./Resources/eye_layer.PNG">
