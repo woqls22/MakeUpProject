@@ -20,7 +20,7 @@
 - [X] CartoonGAN 적용, 실사 사진 일러스트화적용 [20.07.23]
 - [X] CartoonGAN , Layer Extraction 모듈 통합 [20.07.27]
 - [X] Clothes Layer Extraction구현(상의) [20.07.27]
-- [ ] Clothes Layer Extraction구현(하의) [20.07.27]
+- [ ] Clothes Layer Extraction구현(하의) 
 - [ ] Body Layer Extraction
 - [ ] Convert 2D Pattern to 3D style
 
