@@ -8,7 +8,7 @@
 - Based On Unity Project
 - Open CV 
 - Python3.6
-- Tensorflow == 2.2.0
+- Tensorflow 2.2.0
 - Illustration : CartoonGAN
 - dlib, Pillow : Face Detection & Face Layer Extraction
 - Clothes Layer Extraction
