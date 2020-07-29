@@ -6,9 +6,9 @@ import cv2
 import inference_with_ckpt as illustrator
 # Picture FileName
 # Illust Flag => True이면 Cartoon GAN 적용 후 Face Layer 추출, False이면 미적용, 추출
-convert_to_illust = True
+convert_to_illust = False
 
-FileName = "test.png"
+FileName = "TestPic.png"
 ImgName = './input/'+FileName
 detector = dlib.get_frontal_face_detector()
 predictor = dlib.shape_predictor('shape_predictor_68_face_landmarks.dat')
