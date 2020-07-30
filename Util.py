@@ -73,7 +73,7 @@ def extract_face_part(img,part):
 
 def is_face(item):
   # Decide whether the face Area is
-  common_mask = 20
+  common_mask = 10
   #Gray Case
   if(((abs(item[0]-item[1])<common_mask) and (abs(item[1]-item[2])<common_mask) and (abs(item[2]-item[0])<common_mask))):
     return False
@@ -167,9 +167,10 @@ def get_rid_of_face_background(imgname, minX,maxX,maxY):
             pass
         else:
           newData.append((255, 255, 255, 0))
-      elif(item[0]<140 or item[2]>200 or ((abs(item[0]-item[1])<common_mask) and (abs(item[1]-item[2])<common_mask) and (abs(item[2]-item[0])<common_mask))):# Gray Filtering
+            #240 229 227
+      elif(item[0]<220  and ((abs(item[0]-item[1])<common_mask) and (abs(item[1]-item[2])<common_mask) and (abs(item[2]-item[0])<common_mask))):# Gray Filtering
         newData.append((255, 255, 255, 0))
-      elif ((item[0] <= color[0]+red_mask and item[0]>color[0]-red_mask) or (item[1] <= color[1]+mask_interval or item[1]>color[1]-mask_interval) or (item[2] <= color[2]+mask_interval and item[2]>color[2]-mask_interval)):
+      elif ((item[1] <= color[1]+mask_interval or item[1]>color[1]-mask_interval) or (item[2] <= color[2]+mask_interval and item[2]>color[2]-mask_interval)):
         if ((item[0] > item[1] + 85) and (item[0] > item[2] + 85)):
           newData.append((255, 255, 255, 0))
         elif(item[0]>140 and item[1]<140 and item[2]<140):
@@ -185,7 +186,7 @@ def get_rid_of_face_background(imgname, minX,maxX,maxY):
       elif(item[1]<140 or item[2]<140):
         newData.append((255, 255, 255, 0))
       else:
-        newData.append((255, 255, 255, 0))
+        newData.append(item)
       if (x >= width):
         y = y + 1
         x=0
