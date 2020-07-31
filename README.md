@@ -4,14 +4,17 @@
 ## Description
 - 게임 리소스 생성을 위한 AI기반 가상 얼굴 생성 및 Face Part Layer 추출
 
-## Module Structure
+## Env
 - Based On Unity Project
-- Open CV 
-- Python3.6
+- Python 3.6
+- Open CV 4.3.0
 - Tensorflow 2.2.0
+- numpy 1.17.4
 - Illustration : CartoonGAN
-- dlib, Pillow : Face Detection & Face Layer Extraction
-- Clothes Layer Extraction
+- dlib 19.20.0
+- matplotlib 3.2.2
+- Pillow 7.2.0
+
 
 ## Progress
 - [X] Unity 상에서의 FaceRecognition 구현, Face Part별 화장 기능 구현 예정 [20.07.10]
