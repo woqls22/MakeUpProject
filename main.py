@@ -8,7 +8,7 @@ from matplotlib import pyplot as plt
 
 # Picture FileName
 # Illust Flag => True이면 Cartoon GAN 적용 후 Face Layer 추출, False이면 미적용, 추출
-convert_to_illust = True
+convert_to_illust = False
 FileName = "lee.jpg"
 ImgName = './input/'+FileName
 detector = dlib.get_frontal_face_detector()

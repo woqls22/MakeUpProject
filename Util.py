@@ -74,28 +74,19 @@ def extract_face_part(img,part):
 def is_face(item):
   # Decide whether the face Area is
   common_mask = 10
+  #250 146 121
   #Gray Case
   if(((abs(item[0]-item[1])<common_mask) and (abs(item[1]-item[2])<common_mask) and (abs(item[2]-item[0])<common_mask))):
     return False
-  if(item[0]<100):
+  if(item[0]<120):
     return False
-  #RGB Compare
-  #236 200 188
-  #241 179 172
-  #185 121 114
   if(item[0]<item[1] or item[0]<item[2]):
     return False
-  if(item[0]>item[1]+120 or item[0]>item[2]+120):
-    return False
-  if(item[0]<80):
+  if(item[0]>item[1]+120 ):
     return False
   return True
+
 def detect_nose_hole(item):
-  #178 121 117
-  #134 76 73
-  #141 86 81
-  #157 102 98
-  #139 81 77
   if(item[0]<180 and item[1]<130 and item[2]<130):
     return False
   return True
@@ -154,49 +145,20 @@ def get_rid_of_face_background(imgname, minX,maxX,maxY):
     x=-1
     y=0
     for item in datas:
-      #print("{0}, {1}, {2}".format(item[0],item[1],item[2]))
-      #print("{0}, {1}, {2}".format(color[0],color[1],color[2]))
-      #print("========================")
-      #print(item)
       x=x+1
-      if(y>maxY):
-        if(is_face(item) or (x>minX and x<maxX)):
-          #print(x)
-          if(is_face(item)):
-            newData.append(item)
-          else:
-            newData.append((255, 255, 255, 0))
-            pass
+      if(is_face(item) or (x>minX and x<maxX)):
+        if(is_face(item)):
+          newData.append(item)
         else:
           newData.append((255, 255, 255, 0))
-            #240 229 227
-      elif(item[0]<220  and ((abs(item[0]-item[1])<common_mask) and (abs(item[1]-item[2])<common_mask) and (abs(item[2]-item[0])<common_mask))):# Gray Filtering
-        newData.append((255, 255, 255, 0))
-      elif ((item[1] <= color[1]+mask_interval or item[1]>color[1]-mask_interval) or (item[2] <= color[2]+mask_interval and item[2]>color[2]-mask_interval)):
-        if ((item[0] > item[1] + 85) and (item[0] > item[2] + 85)):
-          newData.append((255, 255, 255, 0))
-        elif(item[0]>140 and item[1]<140 and item[2]<140):
-          newData.append((255, 255, 255, 0))
-        elif(item[0]>225 and item[1]<150 and item[2]<150):
-          newData.append((255, 255, 255, 0))
-        else:
-           newData.append(item)
-      elif((item[0]>item[1]+50) or (item[0]>item[2]+50)):
-        newData.append((255, 255, 255, 0))
-      elif(item[0]<item[2] and item[0]<item[1]):
-        newData.append((255, 255, 255, 0))
-      elif(item[1]<140 or item[2]<140):
-        newData.append((255, 255, 255, 0))
+          pass
       else:
-        newData.append(item)
-      if (x >= width):
+        newData.append((255, 255, 255, 0))
+    if (x >= width):
         y = y + 1
         x=0
     img.putdata(newData)
     img.save(imgname, "PNG")
-    #opencv_img = cv2.imread(imgname)
-    #cv2.GaussianBlur(opencv_img, (3,3),0)
-    #cv2.imwrite(imgname, opencv_img)
 
     '''
      print(mouse)
@@ -371,9 +333,6 @@ def get_lip_layer(imgname, mouse):
     y = 0
     center_x = int((min_x+max_x)/2)
     center_y = int((min_y + max_y) / 2)
-    #내부 : 223 99 96
-    #중간지점 : 231 145 145
-    #최외곽 : 234 186 185
     centerLip_color = opencv_img[center_y,center_x]
     for item in datas:
       if(is_in_Area(x,y,min_x,max_x,min_y,max_y) and Lip_Similar_with_point(centerLip_color, item)):
@@ -445,17 +404,21 @@ def get_eyebrow_layer(imgname, lefteyebrow, righteyebrow):
     imgname = "./output/eyebrow.png"
     img.save(imgname, "PNG")
 def Lip_Similar_with_point(source_color, compare_obj):
-   red_confidence = 20
-   confidence = 100
+   red_confidence = 50
+   confidence = 110 # For Filtering Gray
+   #print(source_color)
    sorce_r = source_color[0]
    sorce_g = source_color[1]
    sorce_b = source_color[2]
    obj_r = compare_obj[0]
    obj_g = compare_obj[1]
    obj_b = compare_obj[2]
-   if(abs(sorce_r - obj_r)<red_confidence and abs(sorce_g - obj_g)<confidence):
+   print(source_color)
+   if(obj_b>170 or obj_g>170):
+     return False
+   if(abs(sorce_r - obj_r)<red_confidence and abs(sorce_g - obj_g)<confidence and abs(sorce_b - obj_b)<confidence):
      return True
-   if(abs(sorce_r - obj_r)<red_confidence and abs(sorce_b - obj_b)<confidence):
+   if(abs(sorce_r - obj_g)>60 and abs(sorce_r - obj_b)>60):
      return True
    return False
 def Eyebrow_Similar_with_point(source_color, compare_obj):
