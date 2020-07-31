@@ -56,6 +56,7 @@ https://drive.google.com/file/d/14vTYmsHjUYv3VPo1Byrecs3NQuvJo89t/view
 - Added : CartoonGAN Module [20.07.23]
 - Integrated : CartoonGAN & Face Layer Extraction Module [20.07.27]
 - Added : Clothes Layer Extraction [20.07.27]
+- Modified : Face Skin, Lip Layer Extraction Accuracy Improvement [20.07.31]
 
 ## Lisence
 MIT License
