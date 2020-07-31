@@ -35,8 +35,11 @@
 #### Cheek Layer Extraction
  <img src= "./Resources/cheek_colored2.0.png" width="530px"> 
 
-#### EyeBrow/EyeShadow Layer Extraction
+#### EyeBrow Layer Extraction
   <img src= "./Resources/eye_layer.PNG">
+
+### EyeShadow Layer Extraction
+<img src= "./Resources/eyeshadow_layer.PNG">
 
 #### Clothes Layer Extraction [h5 Model from Anish Josh]
   <img src= "./Resources/clothes_layer.png" width="550px">
