@@ -9,7 +9,7 @@ from matplotlib import pyplot as plt
 # Picture FileName
 # Illust Flag => True이면 Cartoon GAN 적용 후 Face Layer 추출, False이면 미적용, 추출
 convert_to_illust = False
-FileName = "lee.jpg"
+FileName = "blackpink.jpg"
 ImgName = './input/'+FileName
 detector = dlib.get_frontal_face_detector()
 predictor = dlib.shape_predictor('shape_predictor_68_face_landmarks.dat')
@@ -27,6 +27,7 @@ face_sizes = []
 U.eyebrow_masking(img_path, './output/eyebrow'+version+'.png')
 U.eyemasking(img_path, './output/eye'+version+'.png')
 U.eyeshadow_masking(img_path, './output/eyeshadow'+version+'.png')
+U.eyeshadow_Extract(img_path, './output/eyeshadow_modified'+version+'.png')
 while True:
   img = cv2.imread(ImgName)
   print("Input Image : "+ImgName)
@@ -181,7 +182,6 @@ while True:
 
   U.get_lip_layer(ImgName,mouse)
   U.get_eyebrow_layer(ImgName, left_eyes_brow, right_eyes_brow)
-
 
 
   x = []

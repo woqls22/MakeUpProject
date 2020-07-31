@@ -413,7 +413,6 @@ def Lip_Similar_with_point(source_color, compare_obj):
    obj_r = compare_obj[0]
    obj_g = compare_obj[1]
    obj_b = compare_obj[2]
-   print(source_color)
    if(obj_b>170 or obj_g>170):
      return False
    if(abs(sorce_r - obj_r)<red_confidence and abs(sorce_g - obj_g)<confidence and abs(sorce_b - obj_b)<confidence):
@@ -798,6 +797,34 @@ def eyeshadow_masking(origin_src, out_addr):
     img.putdata(newData)  # 데이터 입력
     img.save(out_addr)  # 이미지name으로 저장
 
+def Eyeshadow_Extraction(origin_src, out_addr):
+  img = cv2.imread(origin_src)
+
+  img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+  eyeshadow_mask = np.zeros_like(img_gray)
+
+  detector = dlib.get_frontal_face_detector()
+  predictor = dlib.shape_predictor("shape_predictor_194_face_landmarks.dat")
+  faces = detector(img_gray)
+
+  for face in faces:
+    landmarks = predictor(img_gray, face)
+    landmarks_points = []
+
+    for n in range(48, 54):
+      if n == 48:
+        x = landmarks.part(n).x * 1.007
+        y = landmarks.part(n).y * 0.995
+      elif n == 49:
+        x = landmarks.part(n).x
+        y = landmarks.part(n).y * 0.995
+      else:
+        x = landmarks.part(n).x * 0.995
+        y = landmarks.part(n).y * 0.995
+      landmarks_points.append((x, y))
+
+
+
 def eyebrow_masking(origin_src, out_addr):
   img = cv2.imread(origin_src)
   img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -895,3 +922,197 @@ def eyebrow_masking(origin_src, out_addr):
 
   img.putdata(newData)  # 데이터 입력
   img.save(out_addr)  # 이미지name으로 저장
+
+def get_xy_from_landmark(landmarks, n):
+  x = landmarks.part(n).x
+  y = landmarks.part(n).y
+  return (x,y)
+
+def eyeshadow_Extract(origin_src, out_addr):
+  img = cv2.imread(origin_src)
+  img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+  eyeshadow_mask = np.zeros_like(img_gray)
+
+  detector = dlib.get_frontal_face_detector()
+  predictor = dlib.shape_predictor("shape_predictor_194_face_landmarks.dat")
+  faces = detector(img_gray)
+  right_criteria_len = 0
+  left_criteria_len = 0
+  right_end = (0,0)
+  left_end = (0,0)
+  right_start=(0,0)
+  left_start=(0,0)
+  left_eye=[]
+  right_eye=[]
+  for face in faces:
+    landmarks = predictor(img_gray, face)
+    landmarks_points = []
+    right_criteria_len = landmarks.part(33).y - landmarks.part(88).y
+    left_criteria_len = landmarks.part(57).y-landmarks.part(107).y
+
+
+    x,y = get_xy_from_landmark(landmarks, 82)
+    right_eye.append((x,y))
+    x, y = get_xy_from_landmark(landmarks, 83)
+    right_eye.append((x, y))
+    x, y = get_xy_from_landmark(landmarks, 84)
+    right_eye.append((x, y))
+    x, y = get_xy_from_landmark(landmarks, 85)
+    right_eye.append((x, y))
+    x, y = get_xy_from_landmark(landmarks, 86)
+    right_eye.append((x, y))
+    x, y = get_xy_from_landmark(landmarks, 88)
+    right_center=(x,y)
+    right_eye.append((x, y))
+    x, y = get_xy_from_landmark(landmarks, 89)
+    right_eye.append((x, y))
+    x, y = get_xy_from_landmark(landmarks, 90)
+    right_eye.append((x, y))
+    x, y = get_xy_from_landmark(landmarks, 91)
+    right_eye.append((x, y)) # 9개 우측 눈썹 포인트 저장
+    x, y = get_xy_from_landmark(landmarks, 26) #인덱스 9 ~ 19까지 눈 부분
+    right_start=(x, y)
+    right_eye.append((x, y))
+    x, y = get_xy_from_landmark(landmarks, 27)
+    right_eye.append((x, y))
+    x, y = get_xy_from_landmark(landmarks, 28)
+    right_eye.append((x, y))
+    x, y = get_xy_from_landmark(landmarks, 29)
+    right_eye.append((x, y))
+    x, y = get_xy_from_landmark(landmarks, 30)
+    right_eye.append((x, y))
+    x, y = get_xy_from_landmark(landmarks, 31)
+    right_eye.append((x, y))
+    x, y = get_xy_from_landmark(landmarks, 33)
+    right_eye.append((x, y))
+    x, y = get_xy_from_landmark(landmarks, 34)
+    right_eye.append((x, y))
+    x, y = get_xy_from_landmark(landmarks, 35)
+    right_eye.append((x, y))
+    x, y = get_xy_from_landmark(landmarks, 36)
+    right_eye.append((x, y))
+    x, y = get_xy_from_landmark(landmarks, 37)
+    right_end=(x, y)
+    right_eye.append((x, y)) #우측 눈 윗부분 왼쪽부터 11개 입력
+    x,y = get_xy_from_landmark(landmarks, 104)
+    left_eye.append((x,y))
+    x, y = get_xy_from_landmark(landmarks, 105)
+    left_eye.append((x, y))
+    x, y = get_xy_from_landmark(landmarks, 106)
+    left_eye.append((x, y))
+    x, y = get_xy_from_landmark(landmarks, 107)
+    left_eye.append((x, y))
+    x, y = get_xy_from_landmark(landmarks, 108)
+    left_eye.append((x, y))
+    x, y = get_xy_from_landmark(landmarks, 110)
+    left_center = (x, y)
+    left_eye.append((x, y))
+    x, y = get_xy_from_landmark(landmarks, 111)
+    left_eye.append((x, y))
+    x, y = get_xy_from_landmark(landmarks, 112)
+    left_eye.append((x, y))
+    x, y = get_xy_from_landmark(landmarks, 113)
+    left_eye.append((x, y)) # 9개 좌측 눈썹 포인트 저장
+    x, y = get_xy_from_landmark(landmarks, 48)
+    left_start=(x, y)
+    left_eye.append((x, y))
+    x, y = get_xy_from_landmark(landmarks, 49)
+    left_eye.append((x, y))
+    x, y = get_xy_from_landmark(landmarks, 50)
+    left_eye.append((x, y))
+    x, y = get_xy_from_landmark(landmarks, 51)
+    left_eye.append((x, y))
+    x, y = get_xy_from_landmark(landmarks, 52)
+    left_eye.append((x, y))
+    x, y = get_xy_from_landmark(landmarks, 53)
+    left_eye.append((x, y))
+    x, y = get_xy_from_landmark(landmarks, 55)
+    left_eye.append((x, y))
+    x, y = get_xy_from_landmark(landmarks, 56)
+    left_eye.append((x, y))
+    x, y = get_xy_from_landmark(landmarks, 57)
+    left_eye.append((x, y))
+    x, y = get_xy_from_landmark(landmarks, 58)
+    left_eye.append((x, y))
+    x, y = get_xy_from_landmark(landmarks, 59)
+    left_end=(x, y)
+    left_eye.append((x, y)) #좌측 눈 윗부분 오른쪽부터 11개 입력
+#        cv2.circle(img, center=tuple(s), radius=1, color=(255, 0, 0), thickness=2, lineType=cv2.LINE_AA)
+  fill_left=[]
+  fill_right=[]
+
+  number = 0
+  for i in left_eye:
+    temp = i
+    if(number==8):
+      temp_left_point_x = int(left_start[0] + left_criteria_len * 0.7)
+      temp_left_point_y = int(left_start[1] - left_criteria_len * 0.2)
+      #cv2.circle(eyeshadow_mask, (temp_left_point_x, temp_left_point_y), radius=2, color=(255, 255, 255), thickness=1,lineType=cv2.LINE_AA)
+      #cv2.putText(eyeshadow_mask, str(number), (temp_left_point_x,temp_left_point_y), cv2.FONT_HERSHEY_PLAIN, 1, (255, 255, 255),1)
+      fill_left.append((temp_left_point_x, temp_left_point_y))
+      number = number + 1
+      continue
+    if(number>=9):
+      temp = (i[0],int(i[1]-left_criteria_len*0.2))
+    #cv2.circle(eyeshadow_mask, temp, radius=2, color=(255, 255, 255), thickness=2, lineType=cv2.LINE_AA)
+    #cv2.putText(eyeshadow_mask, str(number), temp,  cv2.FONT_HERSHEY_PLAIN,  1, (255, 255, 255),1)
+    fill_left.append(temp)
+    number = number+1
+  #cv2.line(eyeshadow_mask, left_center, (left_center[0], left_center[1]+left_criteria_len), (255,255,255), 2)
+
+  number = 0
+  print(right_eye)
+  for j in right_eye:
+    if(number == 8):
+      temp_right_point_x = int(right_start[0] - right_criteria_len * 0.7)
+      temp_right_point_y = int(right_start[1] - right_criteria_len * 0.2)
+      #cv2.circle(eyeshadow_mask, (temp_right_point_x, temp_right_point_y), radius=2, color=(255, 255, 255), thickness=1, lineType=cv2.LINE_AA)
+      fill_right.append((temp_right_point_x, temp_right_point_y))
+      #cv2.putText(eyeshadow_mask, str(number), (temp_right_point_x, temp_right_point_y), cv2.FONT_HERSHEY_PLAIN, 1, (255, 255, 255),1)
+      number = number + 1
+      continue
+    temp = j
+    if(number>=9):
+      temp = (j[0],int(j[1]-right_criteria_len*0.2))
+    #cv2.putText(eyeshadow_mask, str(number), temp,  cv2.FONT_HERSHEY_PLAIN, 1, (255, 255, 255),1)
+    #cv2.circle(eyeshadow_mask, temp, radius=2, color=(255, 255, 255), thickness=2, lineType=cv2.LINE_AA)
+    fill_right.append(temp)
+    number = number+1
+  #cv2.line(eyeshadow_mask, right_center, (right_center[0], right_center[1] + right_criteria_len), (255, 255, 255), 2)
+
+  temp_left_point_x = int(left_end[0]-left_criteria_len*0.8)
+  temp_left_point_y = int(left_end[1]-left_criteria_len*0.1)
+  temp_right_point_x = int(right_end[0]+right_criteria_len*0.8)
+  temp_right_point_y = int(right_end[1]-right_criteria_len*0.1)
+
+  cv2.circle(eyeshadow_mask,(temp_left_point_x,temp_left_point_y),radius=1, color=(255, 255, 255), thickness=2, lineType=cv2.LINE_AA)
+  cv2.circle(eyeshadow_mask, (temp_right_point_x, temp_right_point_y), radius=1, color=(255, 255, 255), thickness=2, lineType=cv2.LINE_AA)
+  fill_left.append((temp_left_point_x,temp_left_point_y))
+  fill_right.append((temp_right_point_x, temp_right_point_y))
+
+
+
+  fill_left = np.array(fill_left, np.int32)
+  fill_right = np.array(fill_right, np.int32)
+
+  eyeshadow_mask = cv2.fillPoly(eyeshadow_mask, [fill_right], (255,255,255))
+  eyeshadow_mask = cv2.fillPoly(eyeshadow_mask, [fill_left], (255,255,255))
+  #cv2.imshow("eyeshadow", eyeshadow_mask)
+
+  cv2.imwrite(out_addr, eyeshadow_mask)
+
+  img = Image.open(out_addr)  # 파일 열기
+  img = img.convert("RGBA")  # RGBA형식으로 변환
+  datas = img.getdata()  # datas에 일차원 배열 형식으로 RGBA입력
+  newData = []
+
+  for item in datas:
+
+    if (item[0] == 255 and item[1] == 255 and item[2] == 255):  # 해당 픽셀 색이 흰색이면
+      newData.append(item)  # 해당 영역 추가
+    else:  # 그렇지 않으면
+      newData.append((255, 255, 255, 0))  # 투명 추가
+
+  img.putdata(newData)  # 데이터 입력
+  img.save(out_addr)  # 이미지name으로 저장
+  print("Extraction : Eyeshadow part")
