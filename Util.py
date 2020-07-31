@@ -77,6 +77,8 @@ def is_face(item):
   #Gray Case
   if(((abs(item[0]-item[1])<common_mask) and (abs(item[1]-item[2])<common_mask) and (abs(item[2]-item[0])<common_mask))):
     return False
+  if(item[0]<100):
+    return False
   #RGB Compare
   #236 200 188
   #241 179 172
@@ -848,29 +850,29 @@ def eyebrow_masking(origin_src, out_addr):
     # 왼쪽 눈썹
     for n in range(92, 98):
       x = landmarks.part(n).x
-      y = landmarks.part(n).y * 0.9
+      y = landmarks.part(n).y
       landmarks_points.append((x, y))
     for n in range(99, 109):
       x = landmarks.part(n).x
-      y = landmarks.part(n).y * 0.9
+      y = landmarks.part(n).y
       landmarks_points.append((x, y))
     for n in range(110, 114):
       x = landmarks.part(n).x
-      y = landmarks.part(n).y * 0.9
+      y = landmarks.part(n).y
       landmarks_points.append((x, y))
 
     # 오른쪽 눈썹
     for n in range(70, 76):
       x = landmarks.part(n).x
-      y = landmarks.part(n).y * 0.9
+      y = landmarks.part(n).y
       landmarks_points.append((x, y))
     for n in range(77, 87):
       x = landmarks.part(n).x
-      y = landmarks.part(n).y * 0.9
+      y = landmarks.part(n).y
       landmarks_points.append((x, y))
     for n in range(88, 92):
       x = landmarks.part(n).x
-      y = landmarks.part(n).y * 0.9
+      y = landmarks.part(n).y
       landmarks_points.append((x, y))
 
     points = np.array(landmarks_points, np.int32)
