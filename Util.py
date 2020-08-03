@@ -2,9 +2,11 @@ import dlib, sys
 import cv2
 import numpy as np
 from PIL import Image
+import hair_parser as HP
 import random
 MAKE_TRANSPARENT = True
-
+import keras
+import time
 def draw_line(img, L):
   for i in range(len(L)-1):
     x = list(L[i])[0]+3
@@ -73,16 +75,16 @@ def extract_face_part(img,part):
 
 def is_face(item):
   # Decide whether the face Area is
-  common_mask = 10
+  common_mask = 5
   #250 146 121
   #Gray Case
   if(((abs(item[0]-item[1])<common_mask) and (abs(item[1]-item[2])<common_mask) and (abs(item[2]-item[0])<common_mask))):
-    return False
+     False
   if(item[0]<120):
     return False
-  if(item[0]<item[1] or item[0]<item[2]):
+  if(item[0]<item[1] and item[0]<item[2]):
     return False
-  if(item[0]>item[1]+120 ):
+  if(item[0]>item[1]+120):
     return False
   return True
 
@@ -128,6 +130,29 @@ def postprocess_face_layer(imgname, nose_x, nose_y):
     img.save(imgname, "PNG")
 
 def get_rid_of_face_background(imgname, minX,maxX,maxY):
+  maxY = maxY+int(maxY*0.2)
+
+  img = cv2.imread(imgname)
+
+  img_HSV = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+  # skin color range for hsv color space
+  HSV_mask = cv2.inRange(img_HSV, (0, 15, 0), (17, 170, 255))
+  HSV_mask = cv2.morphologyEx(HSV_mask, cv2.MORPH_OPEN, np.ones((3, 3), np.uint8))
+
+  # converting from gbr to YCbCr color space
+  img_YCrCb = cv2.cvtColor(img, cv2.COLOR_BGR2YCrCb)
+  # skin color range for hsv color space
+  YCrCb_mask = cv2.inRange(img_YCrCb, (0, 80, 85), (255, 180, 135))
+  YCrCb_mask = cv2.morphologyEx(YCrCb_mask, cv2.MORPH_OPEN, np.ones((3, 3), np.uint8))
+
+  # merge skin detection (YCbCr and hsv)
+  global_mask = cv2.bitwise_and(YCrCb_mask, HSV_mask)
+  global_mask = cv2.medianBlur(global_mask, 3)
+  global_mask = cv2.morphologyEx(global_mask, cv2.MORPH_OPEN, np.ones((4, 4), np.uint8))
+
+  global_result = cv2.bitwise_and(img, img, mask=global_mask)
+  cv2.imwrite("./output/SkinLayer.png", global_result)
+
   if(MAKE_TRANSPARENT):
     img = Image.open(imgname)
     img = img.convert("RGBA")
@@ -147,28 +172,19 @@ def get_rid_of_face_background(imgname, minX,maxX,maxY):
     for item in datas:
       x=x+1
       if(is_face(item) or (x>minX and x<maxX)):
-        if(is_face(item)):
+        if(is_face(item) ):# and not (y>maxY)
           newData.append(item)
         else:
           newData.append((255, 255, 255, 0))
           pass
       else:
         newData.append((255, 255, 255, 0))
-    if (x >= width):
+      if (x >= width):
         y = y + 1
-        x=0
+        x = 0
     img.putdata(newData)
     img.save(imgname, "PNG")
 
-    '''
-     print(mouse)
-     print(left_eyes)
-     print(right_eyes)
-     print(nose)
-     print(face_line)
-     print(left_eyes_brow)
-     print(right_eyes_brow)
-     '''
 def get_Crop_point(part):
   x = []
   y = []
@@ -419,6 +435,7 @@ def Lip_Similar_with_point(source_color, compare_obj):
      return True
    if(abs(sorce_r - obj_g)>60 and abs(sorce_r - obj_b)>60):
      return True
+
    return False
 def Eyebrow_Similar_with_point(source_color, compare_obj):
   red_confidence = 23
@@ -443,6 +460,9 @@ def eyemasking(origin_src, out_addr):
   detector = dlib.get_frontal_face_detector()
   predictor = dlib.shape_predictor("shape_predictor_194_face_landmarks.dat")
   faces = detector(img_gray)
+
+  number = 1
+
   for face in faces:
     landmarks = predictor(img_gray, face)
     landmarks_points = []
@@ -450,29 +470,29 @@ def eyemasking(origin_src, out_addr):
     # 왼쪽 눈
     for n in range(48, 54):
       x = landmarks.part(n).x
-      y = landmarks.part(n).y * 0.98
+      y = landmarks.part(n).y * number
       landmarks_points.append((x, y))
     for n in range(55, 65):
       x = landmarks.part(n).x
-      y = landmarks.part(n).y * 0.98
+      y = landmarks.part(n).y * number
       landmarks_points.append((x, y))
     for n in range(66, 70):
       x = landmarks.part(n).x
-      y = landmarks.part(n).y * 0.98
+      y = landmarks.part(n).y * number
       landmarks_points.append((x, y))
 
     # 오른쪽 눈
     for n in range(26, 32):
       x = landmarks.part(n).x
-      y = landmarks.part(n).y * 0.98
+      y = landmarks.part(n).y * number
       landmarks_points.append((x, y))
     for n in range(33, 43):
       x = landmarks.part(n).x
-      y = landmarks.part(n).y * 0.98
+      y = landmarks.part(n).y * number
       landmarks_points.append((x, y))
     for n in range(44, 48):
       x = landmarks.part(n).x
-      y = landmarks.part(n).y * 0.98
+      y = landmarks.part(n).y * number
       landmarks_points.append((x, y))
 
       # cv2.circle(img, (x, y), 3, (0, 0, 255), -1)
@@ -1116,3 +1136,58 @@ def eyeshadow_Extract(origin_src, out_addr):
   img.putdata(newData)  # 데이터 입력
   img.save(out_addr)  # 이미지name으로 저장
   print("Extraction : Eyeshadow part")
+
+def bitwise_masking(non_bgrimg, max_face):
+  #./output/SkinLayer.png
+  img = cv2.imread("./output/face_line_img2.0.png")
+  origin = cv2.imread(non_bgrimg)
+  img2gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+  ret,mask = cv2.threshold(img2gray, 254, 255, cv2.THRESH_BINARY)
+  cv2.imwrite("mask_before.jpg", mask)
+  mask_inverted = cv2.bitwise_not(mask)
+  cv2.imwrite("mask_inverted.jpg",mask_inverted)
+  img1_bg = cv2.bitwise_and(origin, origin, mask = mask)
+  width = img1_bg.shape[1]
+  height = img1_bg.shape[0]
+  cv2.imwrite("cloth.png",img1_bg)
+  img = Image.open("cloth.png")  # 파일 열기
+  img = img.convert("RGBA")  # RGBA형식으로 변환
+  datas = img.getdata()  # datas에 일차원 배열 형식으로 RGBA입력
+  newData = []
+  x = -1
+  y = 0
+  for item in datas:
+    x = x + 1
+    if (item[0] == 0 and item[1] == 0 and item[2] == 0 or (y<=max_face)):  # 해당 픽셀 색이 검정이거나, 턱선 위 일 경우 투명처리
+      newData.append((255, 255, 255, 0))
+    else:  # 그렇지 않으면
+      newData.append(item)  # 해당 영역 추가
+    if (x >= width):
+      y = y + 1
+      x = 0
+  img.putdata(newData)  # 데이터 입력
+  img.save("cloth.png")  # 이미지name으로 저장
+
+def get_hair(origin_src, out_addr):
+  img = origin_src
+
+  mask = HP.predict(img)
+  dst = HP.transfer(img, mask)
+  mask_hair = cv2.resize(mask, (img.shape[1], img.shape[0]))
+  mask_hair = cv2.GaussianBlur(mask_hair,(9,9),0)
+  cv2.imwrite("HairMasking.png", mask)
+  cv2.imwrite("./output/origin.png", img)
+  cv2.imwrite(out_addr, mask_hair)
+
+  img = Image.open(out_addr)  # 파일 열기
+  img = img.convert("RGBA")  # RGBA형식으로 변환
+  datas = img.getdata()  # datas에 일차원 배열 형식으로 RGBA입력
+  newData = []
+  for item in datas:
+    if (item[0] == 0 and item[1] == 0 and item[2] == 0):  # 해당 픽셀 색이 검정이거나, 턱선 위 일 경우 투명처리
+      newData.append((255, 255, 255, 0))
+    else:  # 그렇지 않으면
+      newData.append(item)  # 해당 영역 추가
+
+  img.putdata(newData)  # 데이터 입력
+  img.save(out_addr)  # 이미지name으로 저장

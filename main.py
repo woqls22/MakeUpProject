@@ -5,11 +5,16 @@ import numpy as np
 import cv2
 import inference_with_ckpt as illustrator
 from matplotlib import pyplot as plt
-
+import remove_bgr as RB
 # Picture FileName
 # Illust Flag => True이면 Cartoon GAN 적용 후 Face Layer 추출, False이면 미적용, 추출
 convert_to_illust = False
-FileName = "blackpink.jpg"
+Remove_BG=True
+FileName = "mental.png"
+if(Remove_BG):
+  img_Name = RB.start()
+  FileName = img_Name.split('/')[2]
+print("FileName : "+FileName)
 ImgName = './input/'+FileName
 detector = dlib.get_frontal_face_detector()
 predictor = dlib.shape_predictor('shape_predictor_68_face_landmarks.dat')
@@ -18,6 +23,7 @@ version="2.0"
 modelpath = "./light_shinkai_ckpt"
 img_path = ImgName
 out_dir = './output/'
+
 
 if(convert_to_illust):
   illustrator.convert(modelpath, img_path,out_dir)
@@ -68,6 +74,8 @@ while True:
     points_for_leftcheek = []
     points_for_rightcheek = []
     points_for_nosecheek=[]
+    end_of_face = 0
+    start_of_face=0
     for s in shape_2d:
       ## 얼굴 각 부위를 Array에 넣음.
       if(point_number>=48 and point_number<=59): ## Mouse Part
@@ -122,6 +130,8 @@ while True:
         if(point_number==12 or point_number==15): #오른쪽 뺨 볼터치 레이어 point
           cv2.circle(img, center=tuple(s), radius=1, color=(0, 0, 255), thickness=2, lineType=cv2.LINE_AA)
           points_for_rightcheek.append(s)
+        if(point_number==5):
+          end_of_face=s[1]
 
       elif (point_number >= 17 and point_number <= 21):  # left_eyes_brow Part
         cv2.circle(img, center=tuple(s), radius=1, color=(170, 170, 170), thickness=2, lineType=cv2.LINE_AA)
@@ -199,12 +209,12 @@ while True:
     nose_x.append(nose[0:len(nose)][i][0])
     nose_y.append(nose[0:len(nose)][i][1])
 
-  U.get_rid_of_face_background(out_dir+'face_line_img'+version+'.png', minX,maxX,maxY)
+  U.get_rid_of_face_background(out_dir+'face_line_img'+version+'.png', minX,maxX,end_of_face)
   U.postprocess_face_layer(out_dir+'face_line_img'+version+'.png', nose_x, nose_y)
 
   face_cover = cv2.imread(out_dir+'face_line_img'+version+'.png')
-
-
+  U.bitwise_masking(img_Name,end_of_face)
+  U.get_hair(img, out_dir+'Hair'+version+'.png')
   print("Process Done.")
   img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
   plt.imshow(img)

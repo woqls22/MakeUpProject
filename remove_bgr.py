@@ -60,7 +60,7 @@ class DeepLabModel(object):
 
     return resized_image, seg_map
 
-def drawSegment(baseImg, matImg):
+def drawSegment(baseImg, matImg,inputFilePath,outputFilePath):
   width, height = baseImg.size
   origin = cv2.imread(inputFilePath)
   height1,width1,channel = origin.shape
@@ -85,10 +85,12 @@ def drawSegment(baseImg, matImg):
   img2_bg = cv2.bitwise_and(origin, origin, mask=mask)
   cv2.imwrite(outputFilePath,img2_bg)
   print("===========Processing Is Done=============")
+  print("Img Saved : "+outputFilePath)
   print("==========================================")
 
-print("PreProcessing Before Layer Extraction.")
-while(True):
+
+def start():
+  print("PreProcessing Before Layer Extraction.")
   input_dir = "./input/"
   output_dir = "./input/"
   print("Enter the Input File Name : ", end='')
@@ -123,7 +125,7 @@ while(True):
     resized_im, seg_map = MODEL.run(orignal_im)
 
     # vis_segmentation(resized_im, seg_map)
-    drawSegment(resized_im, seg_map)
+    drawSegment(resized_im, seg_map, inputFilePath, outputFilePath)
 
   run_visualization(inputFilePath)
-
+  return outputFilePath
