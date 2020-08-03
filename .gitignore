@@ -61,3 +61,9 @@ output/mouse2.0.png
 output/nose_img2.0.png
 output/right_eyes_brow_img2.0.png
 output/right_eyes_img2.0.png
+mobile_net_model/frozen_inference_graph.pb
+mobile_net_model/model.ckpt-30000.data-00000-of-00001
+mobile_net_model/model.ckpt-30000.index
+xception_model/frozen_inference_graph.pb
+xception_model/model.ckpt.data-00000-of-00001
+xception_model/model.ckpt.index
