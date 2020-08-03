@@ -67,3 +67,4 @@ mobile_net_model/model.ckpt-30000.index
 xception_model/frozen_inference_graph.pb
 xception_model/model.ckpt.data-00000-of-00001
 xception_model/model.ckpt.index
+hairnet_matting.hdf5

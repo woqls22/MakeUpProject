@@ -24,9 +24,8 @@
 - [X] 섀도우, 눈 레이어 추가, 눈썹 레이어 수정[20.07.21]
 - [X] CartoonGAN 적용, 실사 사진 일러스트화적용 [20.07.23]
 - [X] CartoonGAN , Layer Extraction 모듈 통합 [20.07.27]
-- [X] Clothes Layer Extraction구현(상의) [20.07.27]
+- [X] Clothes Layer Extraction구현 [20.08.03]
 - [X] 배경분리 모듈 적용(Preprocessing) [20.08.03]
-- [ ] Clothes Layer Extraction구현(하의) 
 - [ ] Body Layer Extraction
 - [ ] Convert 2D Pattern to 3D style
 
@@ -48,8 +47,8 @@
 ### EyeShadow Layer Extraction
 <img src= "./Resources/eyeshadow_layer.PNG">
 
-#### Clothes Layer Extraction [h5 Model from Anish Josh]
-  <img src= "./Resources/clothes_layer.png" width="550px">
+#### Clothes Layer Extraction
+  <img src= "./Resources/FashionLayer.PNG" width="550px">
   <img src= "./Resources/out.png" width="550px">
   
 ```
@@ -69,7 +68,7 @@ https://drive.google.com/file/d/14vTYmsHjUYv3VPo1Byrecs3NQuvJo89t/view
 - Modified : Face Skin, Lip Layer Extraction Accuracy Improvement [20.07.31]
 - Modified : Eye shadow layer can be extracted from the whole body picture [20.07.31]
 - Added : Background Removal Module [20.08.03]
-
+- Added : Clothes Layer Extraction
 ## Lisence
 MIT License
 
