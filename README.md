@@ -25,12 +25,16 @@
 - [X] CartoonGAN 적용, 실사 사진 일러스트화적용 [20.07.23]
 - [X] CartoonGAN , Layer Extraction 모듈 통합 [20.07.27]
 - [X] Clothes Layer Extraction구현(상의) [20.07.27]
+- [X] 배경분리 모듈 적용(Preprocessing) [20.08.03]
 - [ ] Clothes Layer Extraction구현(하의) 
 - [ ] Body Layer Extraction
 - [ ] Convert 2D Pattern to 3D style
 
 #### CartoonGAN processing 전/후
  <img src= "./Resources/21.jpg" width="212px"> <img src= "./Resources/20.jpg" width="212px">
+
+#### BackGround Removal 
+ <img src= "./Resources/Background_remove.PNG" width="440px"> 
 
 #### FaceLayer Extraction
  <img src= "./Resources/5.png" width="400px"> <img src= "./Resources/6.png" width="212px">
@@ -64,6 +68,7 @@ https://drive.google.com/file/d/14vTYmsHjUYv3VPo1Byrecs3NQuvJo89t/view
 - Added : Clothes Layer Extraction [20.07.27]
 - Modified : Face Skin, Lip Layer Extraction Accuracy Improvement [20.07.31]
 - Modified : Eye shadow layer can be extracted from the whole body picture [20.07.31]
+- Added : Background Removal Module [20.08.03]
 
 ## Lisence
 MIT License
@@ -87,3 +92,7 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+## REF
+
+https://github.com/susheelsk/image-background-removal
