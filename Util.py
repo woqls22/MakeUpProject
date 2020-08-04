@@ -7,6 +7,7 @@ import random
 MAKE_TRANSPARENT = True
 import keras
 import time
+import math
 def draw_line(img, L):
   for i in range(len(L)-1):
     x = list(L[i])[0]+3
@@ -29,7 +30,6 @@ def extract_part(img,part):
   maxY = max(y)
   return img[minY:maxY, minX:maxX]
 def extract_nose_part(img,part):
-  print("Extraction : Nose Part")
   x = []
   y = []
   for i in range(len(part)):
@@ -42,7 +42,6 @@ def extract_nose_part(img,part):
   interval = int((maxX-minX)/3)
   return img[minY:maxY, minX-interval:maxX+interval]
 def extract_eye_part(img,part):
-  print("Extraction : Eye Part")
   x = []
   y = []
   for i in range(len(part)):
@@ -56,8 +55,6 @@ def extract_eye_part(img,part):
   intervalX = int((maxX-minX)/4)
   return img[minY-intervalY:maxY, minX-int(intervalX/2):maxX+intervalX]
 def extract_face_part(img,part):
-  print("Extraction : Face Part")
-
   x = []
   y = []
   for i in range(len(part)):
@@ -75,11 +72,11 @@ def extract_face_part(img,part):
 
 def is_face(item):
   # Decide whether the face Area is
-  common_mask = 5
+  common_mask = 10
   #250 146 121
   #Gray Case
   if(((abs(item[0]-item[1])<common_mask) and (abs(item[1]-item[2])<common_mask) and (abs(item[2]-item[0])<common_mask))):
-     False
+    return False
   if(item[0]<120):
     return False
   if(item[0]<item[1] and item[0]<item[2]):
@@ -172,7 +169,7 @@ def get_rid_of_face_background(imgname, minX,maxX,maxY):
     for item in datas:
       x=x+1
       if(is_face(item) or (x>minX and x<maxX)):
-        if(is_face(item) ):# and not (y>maxY)
+        if(is_face(item) and not (item[0]==255 and item[1] == 255 and item[2]==255)):# and not (y>maxY)
           newData.append(item)
         else:
           newData.append((255, 255, 255, 0))
@@ -222,9 +219,11 @@ def erase_layer(img,version, left_eyes_brow, right_eyes_brow, left_eyes, right_e
 
 
 
-def get_cheek_layer(cheek_ori, left_cheekpoint, right_cheekpoint, face_line, nose):
+def get_cheek_layer(cheek_ori, left_cheekpoint, right_cheekpoint, face_line, center_point):
   Lx, Ly = GetIntersetLeftPoints2D(left_cheekpoint)
   Rx, Ry = GetIntersetRightPoints2D(right_cheekpoint)
+  inter_val = 0.4 # 중심 값 이동 변수'
+  max_alpha = 50
   Left_facedot = []
   Right_facedot = []
   cv2.line(cheek_ori, (Lx,Ly), (Lx,Ly), (0,0,0),5)
@@ -266,25 +265,66 @@ def get_cheek_layer(cheek_ori, left_cheekpoint, right_cheekpoint, face_line, nos
   height= int(height*1.5)
   Lx = int(Lx-width*0.3)
   Rx = int(Rx+width*0.3)
+  alpha_left = [int(Lx-width*inter_val),Ly]
+  alpha_right = [int(Rx+width*inter_val),Ry]
   cv2.ellipse(cheek_ori, (Lx, Ly), (width, height), -20, 0, 360, (0, 0, 255), -1)
   cv2.ellipse(cheek_ori, (Rx, Ry), (width, height), 20, 0, 360, (0, 0, 255), -1)
   imgn = "./output/CheekLayer.png"
   cv2.imwrite(imgn, cheek_ori)
   if (MAKE_TRANSPARENT):
     img = Image.open(imgn)
+    opencv_img = cv2.imread(imgn)
+    width = opencv_img.shape[1]
+    height = opencv_img.shape[0]
     img = img.convert("RGBA")
+    x=-1
+    y=0
     datas = img.getdata()
     newData = []
+    min_val ,max_val = cal_min_max(imgn,alpha_right[0],alpha_right[1],alpha_left[0],alpha_left[1],center_point,[255,0,0]) #정규화를 위한 최대 최소 계산
     for item in datas:
-      if (item[0]==255 and item[1]== 0 and item[2] == 0):
-        newData.append(item)
+      x=x+1
+      if (item[0]==255 and item[1]== 0 and item[2] == 0 and x <center_point):
+        distance = math.sqrt((alpha_left[0]-x)**2+(alpha_left[1]-y)**2)
+        #print("Right distance : "+str(normalization(distance,max_val,min_val))) 정규화 값 출력
+        newData.append((item[0],item[1],item[2],int(max_alpha-normalization(distance,max_val,min_val)*100))) # 거리비례 정규화 역순
+
+      elif(item[0]==255 and item[1]== 0 and item[2] == 0 and x >= center_point):
+        distance = math.sqrt((alpha_right[0]-x)**2+(alpha_right[1]-y)**2)
+        newData.append((item[0], item[1], item[2], int(max_alpha-normalization(distance,max_val,min_val)*100)))
       else:
         newData.append((255, 255, 255, 0))
-
+      if (x >= width):
+        y = y + 1
+        x = 0
     img.putdata(newData)
     imgname = "./output/CheekLayer.png"
+
     print("Cheek Layer Extract [Path] : " + imgname)
     img.save(imgname, "PNG")
+def normalization(distance,Max_val, Min_val): #정규화 max, min 사이 값으로 변경
+  return (distance-Min_val)/(Max_val-Min_val)
+
+def cal_min_max(fname,Rx,Ry,Lx,Ly,center_point, color):
+  img = Image.open(fname)
+  opencv_img = cv2.imread(fname)
+  width = opencv_img.shape[1]
+  height = opencv_img.shape[0]
+  img = img.convert("RGBA")
+  x = -1
+  y = 0
+  datas = img.getdata()
+  distance=[]
+  for item in datas:
+    x = x + 1
+    if (item[0] == color[0] and item[1] == color[1] and item[2] == color[2] and x < center_point):
+      distance.append(math.sqrt((Lx-x)**2+(Ly-y)**2))
+    elif (item[0] == color[0] and item[1] == color[1] and item[2] == color[2] and x >= center_point):
+      distance.append(math.sqrt((Rx-x)**2+(Ry-y)**2))
+    if (x >= width):
+      y = y + 1
+      x = 0
+  return min(distance),max(distance)
 
 def get_center_point(P1,P2):
   x1 = int((P1[0]+P2[0])/2)
@@ -324,11 +364,30 @@ def get_curve(Set):
     Set.append(get_center_point(Set[i-1], Set[i]))
   return np.array(Set, np.int32)
 
+def cal_min_max_center(fname,Cx,Cy):
+  img = Image.open(fname)
+  opencv_img = cv2.imread(fname)
+  width = opencv_img.shape[1]
+  height = opencv_img.shape[0]
+  img = img.convert("RGBA")
+  x = -1
+  y = 0
+  datas = img.getdata()
+  distance=[]
+  for item in datas:
+    x = x + 1
+    distance.append(int(math.sqrt((Cx-x)**2+(Cy-y)**2)))
+    if (x >= width):
+      y = y + 1
+      x = 0
+  return min(distance),max(distance)
+
 def get_lip_layer(imgname, mouse):
   x = -1
   y = 0
   x_list=[]
   y_list=[]
+  max_alpha = 90
   for i in mouse:
     x_list.append(i[0])
     y_list.append(i[1])
@@ -349,13 +408,15 @@ def get_lip_layer(imgname, mouse):
     y = 0
     center_x = int((min_x+max_x)/2)
     center_y = int((min_y + max_y) / 2)
+    min_val, max_val = cal_min_max_center(imgname, center_x,center_y)  # 정규화를 위한 최대 최소 계산
     centerLip_color = opencv_img[center_y,center_x]
     for item in datas:
-      if(is_in_Area(x,y,min_x,max_x,min_y,max_y) and Lip_Similar_with_point(centerLip_color, item)):
-        newData.append(item)
-      else:
-        newData.append((255,255,255,0))
       x = x + 1
+      if (is_in_Area(x, y, min_x, max_x, min_y, max_y) and  Lip_Similar_with_point(centerLip_color, item)):
+        distance = math.sqrt((center_x - x) ** 2 + (center_y - y) ** 2)
+        newData.append((255, 0, 0, int(max_alpha - normalization(distance, max_val, min_val)*1300)))
+      else:
+        newData.append((255, 255, 255, 0))
       if (x >= width):
         y = y + 1
         x = 0
@@ -363,6 +424,7 @@ def get_lip_layer(imgname, mouse):
     img.putdata(newData)
     imgname = "./output/lip_layer.png"
     img.save(imgname, "PNG")
+
 def get_eyebrow_layer(imgname, lefteyebrow, righteyebrow):
   x = -1
   y = 0
@@ -419,6 +481,8 @@ def get_eyebrow_layer(imgname, lefteyebrow, righteyebrow):
     img.putdata(newData)
     imgname = "./output/eyebrow.png"
     img.save(imgname, "PNG")
+
+
 def Lip_Similar_with_point(source_color, compare_obj):
    red_confidence = 50
    confidence = 110 # For Filtering Gray
@@ -845,7 +909,7 @@ def Eyeshadow_Extraction(origin_src, out_addr):
 
 
 
-def eyebrow_masking(origin_src, out_addr):
+def eyebrow_masking(origin_src, out_addr,center_point):
   img = cv2.imread(origin_src)
   img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
   eyebrow_mask = np.zeros_like(img_gray)
@@ -853,16 +917,25 @@ def eyebrow_masking(origin_src, out_addr):
   detector = dlib.get_frontal_face_detector()
   predictor = dlib.shape_predictor("shape_predictor_194_face_landmarks.dat")
   faces = detector(img_gray)
+  lp=[]
+  rp =[]
+  max_alpha=60
   for face in faces:
     landmarks = predictor(img_gray, face)
     landmarks_points = []
 
     # 왼쪽 눈썹
     for n in range(92, 98):
+      if (n == 97):
+        lx = landmarks.part(n).x
+        lp.append(landmarks.part(n).y)
       x = landmarks.part(n).x
       y = landmarks.part(n).y
       landmarks_points.append((x, y))
     for n in range(99, 109):
+      if(n == 108):
+        lx = landmarks.part(n).x
+        lp.append(landmarks.part(n).y)
       x = landmarks.part(n).x
       y = landmarks.part(n).y
       landmarks_points.append((x, y))
@@ -873,10 +946,16 @@ def eyebrow_masking(origin_src, out_addr):
 
     # 오른쪽 눈썹
     for n in range(70, 76):
+      if(n == 75):
+        rx = landmarks.part(n).x
+        rp.append(landmarks.part(n).y)
       x = landmarks.part(n).x
       y = landmarks.part(n).y
       landmarks_points.append((x, y))
     for n in range(77, 87):
+      if (n == 86):
+        rx = landmarks.part(n).x
+        rp.append(landmarks.part(n).y)
       x = landmarks.part(n).x
       y = landmarks.part(n).y
       landmarks_points.append((x, y))
@@ -884,6 +963,7 @@ def eyebrow_masking(origin_src, out_addr):
       x = landmarks.part(n).x
       y = landmarks.part(n).y
       landmarks_points.append((x, y))
+
 
     points = np.array(landmarks_points, np.int32)
 
@@ -927,32 +1007,70 @@ def eyebrow_masking(origin_src, out_addr):
         cv2.line(img, pt1, pt2, (0, 0, 255), 2)
         cv2.line(img, pt2, pt3, (0, 0, 255), 2)
         cv2.line(img, pt1, pt3, (0, 0, 255), 2)
+
   cv2.imwrite(out_addr, eyebrow_mask)
+  ly = int((lp[0]+lp[1])/2)
+  ry = int((rp[0] + rp[1]) / 2)
+  alpha_right = [rx,ry]
+  alpha_left = [lx, ly]
   img = Image.open(out_addr)  # 파일 열기
   img = img.convert("RGBA")  # RGBA형식으로 변환
   datas = img.getdata()  # datas에 일차원 배열 형식으로 RGBA입력
   newData = []
-
+  x = -1
+  y = 0
+  datas = img.getdata()
+  newData = []
+  min_val, max_val = cal_min_max(out_addr, alpha_right[0], alpha_right[1], alpha_left[0], alpha_left[1],center_point,[255,255,255])
   for item in datas:
-
     if (item[0] == 255 and item[1] == 255 and item[2] == 255):  # 해당 픽셀 색이 흰색이면
-      newData.append(item)  # 해당 영역 추가
+      newData.append((255,0,0,255))  # 해당 빨강
     else:  # 그렇지 않으면
       newData.append((255, 255, 255, 0))  # 투명 추가
 
   img.putdata(newData)  # 데이터 입력
   img.save(out_addr)  # 이미지name으로 저장
 
+  img = Image.open(out_addr)
+  opencv_img = cv2.imread(out_addr)
+  width = opencv_img.shape[1]
+  height = opencv_img.shape[0]
+  img = img.convert("RGBA")
+  x = -1
+  y = 0
+  datas = img.getdata()
+  newData = []
+  min_val, max_val = cal_min_max(out_addr, alpha_right[0], alpha_right[1], alpha_left[0], alpha_left[1], center_point,[255, 0, 0])  # 정규화를 위한 최대 최소 계산
+  for item in datas:
+    x = x + 1
+    if (item[0] == 255 and item[1] == 0 and item[2] == 0  and x < center_point):
+      distance = math.sqrt(((alpha_left[0] - x)*0.6) ** 2 + ((alpha_left[1] - y)*3) ** 2)
+      newData.append((255, 0, 0, int(max_alpha - normalization(distance, max_val, min_val) * 100)))  # 거리비례 정규화 역순
+
+    elif (item[0] == 255 and item[1] == 0 and item[2] == 0 and x >= center_point):
+      distance = math.sqrt(((alpha_right[0] - x)*0.6) ** 2 + ((alpha_right[1] - y)*3) ** 2)
+      newData.append((255, 0, 0, int(max_alpha - normalization(distance, max_val, min_val) * 100)))
+    else:
+      newData.append((255, 255, 255, 0))
+    if (x >= width):
+      y = y + 1
+      x = 0
+  img.putdata(newData)
+  imgname = out_addr
+  print("Eyebrow Layer Extract [Path] : " + imgname)
+  img.save(imgname, "PNG")
+
+
 def get_xy_from_landmark(landmarks, n):
   x = landmarks.part(n).x
   y = landmarks.part(n).y
   return (x,y)
 
-def eyeshadow_Extract(origin_src, out_addr):
+def eyeshadow_Extract(origin_src, out_addr,center_point):
   img = cv2.imread(origin_src)
   img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
   eyeshadow_mask = np.zeros_like(img_gray)
-
+  max_alpha = 70 #65 default
   detector = dlib.get_frontal_face_detector()
   predictor = dlib.shape_predictor("shape_predictor_194_face_landmarks.dat")
   faces = detector(img_gray)
@@ -1004,6 +1122,7 @@ def eyeshadow_Extract(origin_src, out_addr):
     x, y = get_xy_from_landmark(landmarks, 31)
     right_eye.append((x, y))
     x, y = get_xy_from_landmark(landmarks, 33)
+    alpha_right = [x,y]
     right_eye.append((x, y))
     x, y = get_xy_from_landmark(landmarks, 34)
     right_eye.append((x, y))
@@ -1047,6 +1166,8 @@ def eyeshadow_Extract(origin_src, out_addr):
     x, y = get_xy_from_landmark(landmarks, 53)
     left_eye.append((x, y))
     x, y = get_xy_from_landmark(landmarks, 55)
+    alpha_left = [x, y]
+
     left_eye.append((x, y))
     x, y = get_xy_from_landmark(landmarks, 56)
     left_eye.append((x, y))
@@ -1081,7 +1202,6 @@ def eyeshadow_Extract(origin_src, out_addr):
   #cv2.line(eyeshadow_mask, left_center, (left_center[0], left_center[1]+left_criteria_len), (255,255,255), 2)
 
   number = 0
-  print(right_eye)
   for j in right_eye:
     if(number == 8):
       temp_right_point_x = int(right_start[0] - right_criteria_len * 0.7)
@@ -1121,21 +1241,36 @@ def eyeshadow_Extract(origin_src, out_addr):
 
   cv2.imwrite(out_addr, eyeshadow_mask)
 
-  img = Image.open(out_addr)  # 파일 열기
-  img = img.convert("RGBA")  # RGBA형식으로 변환
-  datas = img.getdata()  # datas에 일차원 배열 형식으로 RGBA입력
+
+
+  img = Image.open(out_addr)
+  opencv_img = cv2.imread(out_addr)
+  width = opencv_img.shape[1]
+  height = opencv_img.shape[0]
+  img = img.convert("RGBA")
+  x = -1
+  y = 0
+  datas = img.getdata()
   newData = []
-
+  min_val, max_val = cal_min_max(out_addr, alpha_right[0], alpha_right[1], alpha_left[0], alpha_left[1],center_point,[255,255,255])  # 정규화를 위한 최대 최소 계산
   for item in datas:
+    x=x+1
+    if (item[0]==255 and item[1]== 255 and item[2] == 255 and x <center_point):
+      distance = math.sqrt(((alpha_left[0]-x)*0.8)**2+((alpha_left[1]-y)*1.4)**2)
+      newData.append((255,0,0,int(max_alpha-normalization(distance,max_val,min_val)*130))) # 거리비례 정규화 역순
 
-    if (item[0] == 255 and item[1] == 255 and item[2] == 255):  # 해당 픽셀 색이 흰색이면
-      newData.append(item)  # 해당 영역 추가
-    else:  # 그렇지 않으면
-      newData.append((255, 255, 255, 0))  # 투명 추가
-
-  img.putdata(newData)  # 데이터 입력
-  img.save(out_addr)  # 이미지name으로 저장
-  print("Extraction : Eyeshadow part")
+    elif(item[0]==255 and item[1]== 255 and item[2] == 255 and x >= center_point):
+      distance = math.sqrt(((alpha_right[0]-x)*0.8)**2+((alpha_right[1]-y)*1.4)**2)
+      newData.append((255,0,0, int(max_alpha-normalization(distance,max_val,min_val)*130)))
+    else:
+      newData.append((255, 255, 255, 0))
+    if (x >= width):
+      y = y + 1
+      x = 0
+  img.putdata(newData)
+  imgname = out_addr
+  print("Eyeshadow Layer Extract [Path] : " + imgname)
+  img.save(imgname, "PNG")
 
 def bitwise_masking(non_bgrimg, max_face):
   #./output/SkinLayer.png
