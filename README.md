@@ -74,7 +74,9 @@ https://drive.google.com/file/d/14vTYmsHjUYv3VPo1Byrecs3NQuvJo89t/view
 - Modified : Face Skin, Lip Layer Extraction Accuracy Improvement [20.07.31]
 - Modified : Eye shadow layer can be extracted from the whole body picture [20.07.31]
 - Added : Background Removal Module [20.08.03]
-- Added : Clothes Layer Extraction
+- Added : Clothes Layer Extraction [20.08.03]
+- Added : Apply alpha value for each layer [20.08.04]
+
 ## Lisence
 MIT License
 
