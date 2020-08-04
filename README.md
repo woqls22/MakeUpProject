@@ -1,5 +1,5 @@
 # MakeUpProject
-게임 리소스[아바타 및 가상 인물] 생성 AI 프로젝트
+게임 리소스[MakeUp Layer] 생성 AI 프로젝트
 
 ## Description
 - 게임 리소스 생성을 위한 AI기반 가상 얼굴 생성 및 Face Part Layer 추출
@@ -26,8 +26,13 @@
 - [X] CartoonGAN , Layer Extraction 모듈 통합 [20.07.27]
 - [X] Clothes Layer Extraction구현 [20.08.03]
 - [X] 배경분리 모듈 적용(Preprocessing) [20.08.03]
+- [X] 각 레이어마다 알파값 적용(natural Make up)[20.08.04]
 - [ ] Body Layer Extraction
 - [ ] Convert 2D Pattern to 3D style
+
+#### MakeUp Result 전/후
+
+<img src= "./Resources/makeup.PNG">
 
 #### CartoonGAN processing 전/후
  <img src= "./Resources/21.jpg" width="212px"> <img src= "./Resources/20.jpg" width="212px">
@@ -44,13 +49,14 @@
 #### EyeBrow Layer Extraction
   <img src= "./Resources/eye_layer.PNG">
 
-### EyeShadow Layer Extraction
+#### EyeShadow Layer Extraction
 <img src= "./Resources/eyeshadow_layer.PNG">
 
 #### Clothes Layer Extraction
   <img src= "./Resources/FashionLayer.PNG" width="550px">
   <img src= "./Resources/out.png" width="550px">
   
+
 ```
 - topwears.h5 model file download
 https://drive.google.com/file/d/14vTYmsHjUYv3VPo1Byrecs3NQuvJo89t/view
