@@ -58,7 +58,9 @@
   <img src= "./Resources/out.png" width="550px">
   
 #### Clothes Texture Fitting
-  <img src= "./Resources/fitting.PNG">
+  <img src= "./Resources/fitting.PNG" width="650px">
+
+  <img src= "./Resources/fitting2.png" width="700px">
 
 ```
 - topwears.h5 model file download
