@@ -27,9 +27,10 @@
 - [X] Clothes Layer Extraction구현 [20.08.03]
 - [X] 배경분리 모듈 적용(Preprocessing) [20.08.03]
 - [X] 각 레이어마다 알파값 적용(natural Make up)[20.08.04]
-- [ ] Clothes Layer Extraction 정확도 개선 작업
 - [X] OpenCV활용, Clothes Texture 변경 적용 [20.08.05]
 - [X] Convert 2D Pattern to 3D style [20.08.05]
+- [ ] Clothes Layer Extraction 정확도 개선 작업
+- [ ] Hair Segmentation 구현(딥러닝 모델 사용)
 
 #### MakeUp Result 전/후
 
