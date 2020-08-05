@@ -387,7 +387,7 @@ def get_lip_layer(imgname, mouse):
   y = 0
   x_list=[]
   y_list=[]
-  max_alpha = 90
+  max_alpha = 70
   for i in mouse:
     x_list.append(i[0])
     y_list.append(i[1])
@@ -412,8 +412,9 @@ def get_lip_layer(imgname, mouse):
     centerLip_color = opencv_img[center_y,center_x]
     for item in datas:
       x = x + 1
-      if (is_in_Area(x, y, min_x, max_x, min_y, max_y) and  Lip_Similar_with_point(centerLip_color, item)):
-        distance = math.sqrt((center_x - x) ** 2 + (center_y - y) ** 2)
+      #and Lip_Similar_with_point(centerLip_color, item)
+      if (is_in_Area(x, y, min_x, max_x, min_y, max_y) ):
+        distance = math.sqrt(((center_x - x)*0.7) ** 2 + ((center_y - y)*1.7) ** 2)
         newData.append((255, 0, 0, int(max_alpha - normalization(distance, max_val, min_val)*1300)))
       else:
         newData.append((255, 255, 255, 0))
@@ -1009,6 +1010,7 @@ def eyebrow_masking(origin_src, out_addr,center_point):
         cv2.line(img, pt1, pt3, (0, 0, 255), 2)
 
   cv2.imwrite(out_addr, eyebrow_mask)
+
   ly = int((lp[0]+lp[1])/2)
   ry = int((rp[0] + rp[1]) / 2)
   alpha_right = [rx,ry]
@@ -1044,11 +1046,11 @@ def eyebrow_masking(origin_src, out_addr,center_point):
   for item in datas:
     x = x + 1
     if (item[0] == 255 and item[1] == 0 and item[2] == 0  and x < center_point):
-      distance = math.sqrt(((alpha_left[0] - x)*0.6) ** 2 + ((alpha_left[1] - y)*3) ** 2)
+      distance = math.sqrt(((alpha_left[0] - x)*0.6) ** 2 + ((alpha_left[1] - y)*4) ** 2)
       newData.append((255, 0, 0, int(max_alpha - normalization(distance, max_val, min_val) * 100)))  # 거리비례 정규화 역순
 
     elif (item[0] == 255 and item[1] == 0 and item[2] == 0 and x >= center_point):
-      distance = math.sqrt(((alpha_right[0] - x)*0.6) ** 2 + ((alpha_right[1] - y)*3) ** 2)
+      distance = math.sqrt(((alpha_right[0] - x)*0.6) ** 2 + ((alpha_right[1] - y)*4) ** 2)
       newData.append((255, 0, 0, int(max_alpha - normalization(distance, max_val, min_val) * 100)))
     else:
       newData.append((255, 255, 255, 0))
@@ -1293,7 +1295,7 @@ def bitwise_masking(non_bgrimg, max_face):
   y = 0
   for item in datas:
     x = x + 1
-    if (item[0] == 0 and item[1] == 0 and item[2] == 0 or (y<=max_face)):  # 해당 픽셀 색이 검정이거나, 턱선 위 일 경우 투명처리
+    if ((item[0] == 0 and item[1] == 0 and item[2] == 0) or (y<=max_face) or (item[0]==255 and item[1] == 255 and item[2]==255)):  # 해당 픽셀 색이 검정이거나, 턱선 위 일 경우 투명처리
       newData.append((255, 255, 255, 0))
     else:  # 그렇지 않으면
       newData.append(item)  # 해당 영역 추가

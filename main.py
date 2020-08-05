@@ -6,17 +6,21 @@ import cv2
 import inference_with_ckpt as illustrator
 from matplotlib import pyplot as plt
 import remove_bgr as RB
+import pattern
+from PIL import Image
 # Picture FileName
 # Illust Flag => True이면 Cartoon GAN 적용 후 Face Layer 추출, False이면 미적용, 추출
 convert_to_illust = False
-Remove_BG=False
+Remove_BG=True
 FileName = "mental.png"
+input_file=""
 if(Remove_BG):
-  img_Name = RB.start()
+  img_Name,input_file = RB.start()
   FileName = img_Name.split('/')[2]
 else:
   print("Enter the File Name : ", end='')
   FileName = input()
+  input_file=FileName
 print("FileName : "+FileName)
 ImgName = './input/'+FileName
 img_Name = ImgName
@@ -28,7 +32,8 @@ modelpath = "./light_shinkai_ckpt"
 img_path = ImgName
 out_dir = './output/'
 
-
+print("Enter the Pattern Image : ", end='')
+pattern_file = input()
 if(convert_to_illust):
   illustrator.convert(modelpath, img_path,out_dir)
   ImgName = out_dir+FileName
@@ -200,6 +205,7 @@ while True:
   print("face_line_img Layer Extract [Path] : " + out_dir+'face_line_img'+version+'.png')
   lip_fname = out_dir+'mouse'+version+'.png'
   U.get_lip_layer(ImgName,mouse)
+
   #U.get_eyebrow_layer(ImgName, left_eyes_brow, right_eyes_brow)
 
 
@@ -222,11 +228,57 @@ while True:
   U.postprocess_face_layer(out_dir+'face_line_img'+version+'.png', nose_x, nose_y)
 
   face_cover = cv2.imread(out_dir+'face_line_img'+version+'.png')
+
+  print("=====")
+  print("[Extraction] Each Face Part Layer Complete .... ")
   U.bitwise_masking(img_Name,end_of_face)
-  U.get_hair(img, out_dir+'Hair'+version+'.png')
+  #U.get_hair(img, out_dir+'Hair'+version+'.png')
+
+  pattern.get_pattern(pattern_file)
+  print("[Extraction] Cloth Layer Complete .... ")
+  print("=====")
   print("Process Done.")
   img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-  plt.imshow(img)
+
+  original = "./input/"+input_file
+  cheek_layer = "./output/CheekLayer.png"
+  eyeshadow_layer = "./output/eyeshadow_modified2.0.png"
+  eyebrow_layer = "./output/eyebrow2.0.png"
+  lip_layer = "./output/lip_layer.png"
+  cloth_layer = "./cloth_pattern.png"
+
+  layer1 = Image.open(original).convert("RGBA")
+  layer2 = Image.open(cheek_layer).convert("RGBA")
+  layer3 = Image.open(eyeshadow_layer).convert("RGBA")
+  layer4 = Image.open(eyebrow_layer).convert("RGBA")
+  layer5 = Image.open(lip_layer).convert("RGBA")
+  layer6 = Image.open(cloth_layer).convert("RGBA")
+
+  S = Image.alpha_composite(layer1, layer2)
+  S = Image.alpha_composite(S, layer3)
+  S = Image.alpha_composite(S, layer4)
+  S = Image.alpha_composite(S, layer5)
+
+  S1 = Image.alpha_composite(S, layer6)
+
+  fig = plt.figure()
+  rows = 1
+  cols = 3
+  ax1 = fig.add_subplot(rows, cols, 1)
+  ax1.imshow(layer1)
+  ax1.set_xlabel('Before')
+  ax1.set_xticks([]), ax1.set_yticks([])
+
+  ax2 = fig.add_subplot(rows, cols, 2)
+  ax2.imshow(S)
+  ax2.set_xlabel('After')
+  ax2.set_xticks([]), ax2.set_yticks([])
+
+  ax2 = fig.add_subplot(rows, cols, 3)
+  ax2.imshow(S1)
+  ax2.set_xlabel('Swap Clothes')
+  ax2.set_xticks([]), ax2.set_yticks([])
+
   plt.show()
   cv2.waitKey(0)
   break
