@@ -27,8 +27,9 @@
 - [X] Clothes Layer Extraction구현 [20.08.03]
 - [X] 배경분리 모듈 적용(Preprocessing) [20.08.03]
 - [X] 각 레이어마다 알파값 적용(natural Make up)[20.08.04]
-- [ ] Body Layer Extraction
-- [ ] Convert 2D Pattern to 3D style
+- [ ] Clothes Layer Extraction 정확도 개선 작업
+- [X] OpenCV활용, Clothes Texture 변경 적용 [20.08.05]
+- [X] Convert 2D Pattern to 3D style [20.08.05]
 
 #### MakeUp Result 전/후
 
@@ -56,6 +57,8 @@
   <img src= "./Resources/FashionLayer.PNG" width="550px">
   <img src= "./Resources/out.png" width="550px">
   
+#### Clothes Texture Fitting
+  <img src= "./Resources/fitting.PNG">
 
 ```
 - topwears.h5 model file download
@@ -76,6 +79,7 @@ https://drive.google.com/file/d/14vTYmsHjUYv3VPo1Byrecs3NQuvJo89t/view
 - Added : Background Removal Module [20.08.03]
 - Added : Clothes Layer Extraction [20.08.03]
 - Added : Apply alpha value for each layer [20.08.04]
+- Added : Clothes Texture Swap Module [20.08.05]
 
 ## Lisence
 MIT License
