@@ -3,6 +3,9 @@
 ## Description
 - 실사 사진 바탕 화장 및 Clothes Swap 프로젝트
 
+- 실행 결과
+<img src= "./Resources/suzy1.png">
+
 ## Env
 - Python 3.6
 - Open CV 4.3.0
@@ -25,15 +28,12 @@
 - [X] 각 레이어마다 알파값 적용(natural Make up)[20.08.04]
 - [X] OpenCV활용, Clothes Texture 변경 적용 [20.08.05]
 - [X] Convert 2D Pattern to 3D style [20.08.05]
-- [ ] Clothes Layer Extraction 정확도 개선 작업
-- [ ] Hair Segmentation 구현(딥러닝 모델 사용)
+- [X] Clothes Layer Extraction 정확도 개선 작업 [20.08.06]
+- [X] Hair Segmentation 구현(딥러닝 모델 사용) [20.08.06]
 
 #### MakeUp Result 전/후
 
 <img src= "./Resources/makeup.PNG">
-
-#### CartoonGAN processing 전/후
- <img src= "./Resources/21.jpg" width="212px"> <img src= "./Resources/20.jpg" width="212px">
 
 #### BackGround Removal 
  <img src= "./Resources/Background_remove.PNG" width="440px"> 
@@ -55,14 +55,13 @@
   <img src= "./Resources/out.png" width="550px">
   
 #### Clothes Texture Fitting
+
   <img src= "./Resources/fitting.PNG">
 
   <img src= "./Resources/fitting2.png">
 
-```
-- topwears.h5 model file download
-https://drive.google.com/file/d/14vTYmsHjUYv3VPo1Byrecs3NQuvJo89t/view
-```
+#### CartoonGAN processing 전/후
+ <img src= "./Resources/21.jpg" width="212px"> <img src= "./Resources/20.jpg" width="212px">
 
 ## Revision History
 - Initialize Project [20.07.11]
@@ -105,4 +104,12 @@ SOFTWARE.
 
 ## REF
 
+```
+- Background Removal Model Ref
+
 https://github.com/susheelsk/image-background-removal
+
+- Hair Segmentation Model Ref
+
+https://github.com/Papich23691/Hair-Detection
+```

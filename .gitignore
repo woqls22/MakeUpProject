@@ -68,3 +68,14 @@ xception_model/frozen_inference_graph.pb
 xception_model/model.ckpt.data-00000-of-00001
 xception_model/model.ckpt.index
 hairnet_matting.hdf5
+model/mask_rcnn_hair_0027.h5
+model/mask_rcnn_hair_0060.h5
+model/mask_rcnn_hair_0061.h5
+model/mask_rcnn_hair_0140.h5
+model/mask_rcnn_hair_0145.h5
+model/mask_rcnn_hair_0200.h5
+mrcnn/__pycache__/__init__.cpython-37.pyc
+mrcnn/__pycache__/config.cpython-37.pyc
+mrcnn/__pycache__/model.cpython-37.pyc
+mrcnn/__pycache__/utils.cpython-37.pyc
+mrcnn/__pycache__/visualize.cpython-37.pyc
