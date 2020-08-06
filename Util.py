@@ -1,13 +1,11 @@
-import dlib, sys
+import dlib
 import cv2
 import numpy as np
 from PIL import Image
-import hair_parser as HP
-import random
-MAKE_TRANSPARENT = True
-import keras
-import time
 import math
+import os
+os.environ["KERAS_BACKEND"] = "tensorflow"
+MAKE_TRANSPARENT = True
 def draw_line(img, L):
   for i in range(len(L)-1):
     x = list(L[i])[0]+3
@@ -181,7 +179,29 @@ def get_rid_of_face_background(imgname, minX,maxX,maxY):
         x = 0
     img.putdata(newData)
     img.save(imgname, "PNG")
-
+    # 가우시안 블러 처리 코드.
+    # face = cv2.imread(imgname)
+    # face = cv2.GaussianBlur(face, (2,2), 2)
+    # cv2.imwrite(imgname,face)
+    # img = Image.open(imgname)
+    # img = img.convert("RGBA")
+    # width = face.shape[1]
+    # height = face.shape[0]
+    # datas = img.getdata()
+    # newData = []
+    # x=-1
+    # y=0
+    # for item in datas:
+    #   x=x+1
+    #   if(item[0]==255 and item[1]==255 and item[2] ==255):
+    #     newData.append((255,255,255,0))
+    #   else:
+    #     newData.append(item)
+    #   if (x >= width):
+    #     y = y + 1
+    #     x = 0
+    # img.putdata(newData)
+    # img.save(imgname,"PNG")
 def get_Crop_point(part):
   x = []
   y = []
@@ -383,11 +403,15 @@ def cal_min_max_center(fname,Cx,Cy):
   return min(distance),max(distance)
 
 def get_lip_layer(imgname, mouse):
+  img = cv2.imread(imgname)
+  img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+  mouse_mask = np.zeros_like(img_gray)
+
   x = -1
   y = 0
   x_list=[]
   y_list=[]
-  max_alpha = 70
+  max_alpha = 50
   for i in mouse:
     x_list.append(i[0])
     y_list.append(i[1])
@@ -395,17 +419,24 @@ def get_lip_layer(imgname, mouse):
   max_x = max(x_list)+5
   min_y = min(y_list)-3
   max_y = max(y_list)+5
+
+  mouse = np.array(mouse, np.int32)
+  mouse_mask = cv2.fillPoly(mouse_mask, [mouse], (255, 255, 255))
+
+  cv2.imwrite("mouse_mask.png",mouse_mask)
+
   if(MAKE_TRANSPARENT):
-    img = Image.open(imgname)
+    img = Image.open("mouse_mask.png")
     img = img.convert("RGBA")
     datas = img.getdata()
-    opencv_img = cv2.imread(imgname)
+    opencv_img = cv2.imread("mouse_mask.png")
     opencv_img = cv2.cvtColor(opencv_img, cv2.COLOR_BGR2RGB)
     width = opencv_img.shape[1]
     height = opencv_img.shape[0]
     newData = []
     x = -1
     y = 0
+
     center_x = int((min_x+max_x)/2)
     center_y = int((min_y + max_y) / 2)
     min_val, max_val = cal_min_max_center(imgname, center_x,center_y)  # 정규화를 위한 최대 최소 계산
@@ -413,11 +444,11 @@ def get_lip_layer(imgname, mouse):
     for item in datas:
       x = x + 1
       #and Lip_Similar_with_point(centerLip_color, item)
-      if (is_in_Area(x, y, min_x, max_x, min_y, max_y) ):
+      if (item[0]==0 and item[1] == 0 and item[2] == 0 ):
+        newData.append((255, 255, 255, 0))
+      else:
         distance = math.sqrt(((center_x - x)*0.7) ** 2 + ((center_y - y)*1.7) ** 2)
         newData.append((255, 0, 0, int(max_alpha - normalization(distance, max_val, min_val)*1300)))
-      else:
-        newData.append((255, 255, 255, 0))
       if (x >= width):
         y = y + 1
         x = 0
@@ -1280,9 +1311,9 @@ def bitwise_masking(non_bgrimg, max_face):
   origin = cv2.imread(non_bgrimg)
   img2gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
   ret,mask = cv2.threshold(img2gray, 254, 255, cv2.THRESH_BINARY)
-  cv2.imwrite("mask_before.jpg", mask)
+  cv2.imwrite("mask_before.png", mask)
   mask_inverted = cv2.bitwise_not(mask)
-  cv2.imwrite("mask_inverted.jpg",mask_inverted)
+  cv2.imwrite("mask_inverted.png",mask_inverted)
   img1_bg = cv2.bitwise_and(origin, origin, mask = mask)
   width = img1_bg.shape[1]
   height = img1_bg.shape[0]
@@ -1305,26 +1336,64 @@ def bitwise_masking(non_bgrimg, max_face):
   img.putdata(newData)  # 데이터 입력
   img.save("cloth.png")  # 이미지name으로 저장
 
-def get_hair(origin_src, out_addr):
-  img = origin_src
+def remove_hair_from_clothes(max_y_from_face):
+  mask_cloth = cv2.imread("mask_before.png")
+  mask_cloth2gray = cv2.cvtColor(mask_cloth, cv2.COLOR_BGR2GRAY)
+  ret, clothmask = cv2.threshold(mask_cloth2gray, 254, 255, cv2.THRESH_BINARY)
 
-  mask = HP.predict(img)
-  dst = HP.transfer(img, mask)
-  mask_hair = cv2.resize(mask, (img.shape[1], img.shape[0]))
-  mask_hair = cv2.GaussianBlur(mask_hair,(9,9),0)
-  cv2.imwrite("HairMasking.png", mask)
-  cv2.imwrite("./output/origin.png", img)
-  cv2.imwrite(out_addr, mask_hair)
+  hair = cv2.imread("hair_crop_transparent/crop_hair.png")
+  hair2gray = cv2.cvtColor(hair, cv2.COLOR_BGR2GRAY)
+  ret, mask = cv2.threshold(hair2gray, 254, 255, cv2.THRESH_BINARY)
+  cv2.imwrite("hair_mask_inverted.jpg", mask)
 
-  img = Image.open(out_addr)  # 파일 열기
-  img = img.convert("RGBA")  # RGBA형식으로 변환
-  datas = img.getdata()  # datas에 일차원 배열 형식으로 RGBA입력
+
+
+  img1_bg = cv2.bitwise_and(mask_cloth, mask_cloth, mask=mask)
+  width = mask_cloth.shape[1]
+  height = mask_cloth.shape[0]
+  cv2.imwrite("cloth_without_hair.png", img1_bg)
+
+  color_pattern = Image.open("cloth_pattern.png")
+  color_pattern = color_pattern.convert("RGBA")
+
+  without_hair = Image.open("cloth_without_hair.png")
+  without_hair = without_hair.convert("RGBA")
+
+  color_pattern_data = color_pattern.getdata()
+  without_hairdata = without_hair.getdata()
+
   newData = []
-  for item in datas:
-    if (item[0] == 0 and item[1] == 0 and item[2] == 0):  # 해당 픽셀 색이 검정이거나, 턱선 위 일 경우 투명처리
+  x = -1
+  y = 0
+  for i in range(len(color_pattern_data)):
+    x = x + 1
+    if ((color_pattern_data[i][0] == 255 and color_pattern_data[i][1] == 255 and color_pattern_data[i][2] == 255 and color_pattern_data[i][3] == 0)):
       newData.append((255, 255, 255, 0))
-    else:  # 그렇지 않으면
-      newData.append(item)  # 해당 영역 추가
+    elif(y>max_y_from_face*3):
+      newData.append(color_pattern_data[i])
+    elif((without_hairdata[i][0] == 0 and without_hairdata[i][1] == 0 and without_hairdata[i][2] == 0)):
+      newData.append((255, 255, 255, 0))
+    else:
+      newData.append(color_pattern_data[i])
+    if (x >= width):
+      y = y + 1
+      x = 0
+  without_hair.putdata(newData)  # 데이터 입력
+  without_hair.save("cloth_without_hair_pattern.png")
 
-  img.putdata(newData)  # 데이터 입력
-  img.save(out_addr)  # 이미지name으로 저장
+
+def accumulate_hair_layer():
+  layer1 = Image.open("./hair_crop_transparent/crop_hair0.png").convert("RGBA")
+  layer2 = Image.open("./hair_crop_transparent/crop_hair1.png").convert("RGBA")
+  layer3 = Image.open("./hair_crop_transparent/crop_hair2.png").convert("RGBA")
+  layer4 = Image.open("./hair_crop_transparent/crop_hair3.png").convert("RGBA")
+  layer5 = Image.open("./hair_crop_transparent/crop_hair4.png").convert("RGBA")
+  layer6 = Image.open("./hair_crop_transparent/crop_hair5.png").convert("RGBA")
+
+  result = Image.alpha_composite(layer1, layer2)
+  result = Image.alpha_composite(result, layer3)
+  result = Image.alpha_composite(result, layer4)
+  result = Image.alpha_composite(result, layer5)
+  result = Image.alpha_composite(result, layer6)
+
+  result.save("./hair_crop_transparent/crop_hair.png")
