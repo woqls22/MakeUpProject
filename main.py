@@ -3,18 +3,22 @@ import cv2
 import dlib
 import numpy as np
 import cv2
-import inference_with_ckpt as illustrator
 from matplotlib import pyplot as plt
-import remove_bgr as RB
 import pattern
 from PIL import Image
+import os
+
+
 # Picture FileName
 # Illust Flag => True이면 Cartoon GAN 적용 후 Face Layer 추출, False이면 미적용, 추출
 convert_to_illust = False
 Remove_BG=True
+Get_HairSeg=True
 FileName = "mental.png"
+
 input_file=""
 if(Remove_BG):
+  import remove_bgr as RB
   img_Name,input_file = RB.start()
   FileName = img_Name.split('/')[2]
 else:
@@ -35,6 +39,7 @@ out_dir = './output/'
 print("Enter the Pattern Image : ", end='')
 pattern_file = input()
 if(convert_to_illust):
+  import inference_with_ckpt as illustrator
   illustrator.convert(modelpath, img_path,out_dir)
   ImgName = out_dir+FileName
 face_roi = []
@@ -83,6 +88,7 @@ while True:
     points_for_nosecheek=[]
     end_of_face = 0
     start_of_face=0
+    max_y_from_face = 0
     for s in shape_2d:
       ## 얼굴 각 부위를 Array에 넣음.
       if(point_number>=48 and point_number<=59): ## Mouse Part
@@ -139,7 +145,8 @@ while True:
           points_for_rightcheek.append(s)
         if(point_number==5):
           end_of_face=s[1]
-
+        if(point_number==9):
+          max_y_from_face=s[1]
       elif (point_number >= 17 and point_number <= 21):  # left_eyes_brow Part
         cv2.circle(img, center=tuple(s), radius=1, color=(170, 170, 170), thickness=2, lineType=cv2.LINE_AA)
         left_eyes_brow.append(s)
@@ -232,34 +239,54 @@ while True:
   print("=====")
   print("[Extraction] Each Face Part Layer Complete .... ")
   U.bitwise_masking(img_Name,end_of_face)
-  #U.get_hair(img, out_dir+'Hair'+version+'.png')
 
+  original = "./input/"+input_file
   pattern.get_pattern(pattern_file)
+
+  if (Get_HairSeg):
+    import hair_segmentation as HS
+    os.environ["KERAS_BACKEND"] = "tensorflow"
+    HS.hair_segment(original) #hair segmentation작업
+    U.accumulate_hair_layer() #레이어 쌓기
+    U.remove_hair_from_clothes(max_y_from_face) # 마스킹작업
+
+
   print("[Extraction] Cloth Layer Complete .... ")
   print("=====")
   print("Process Done.")
+
+
   img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
-  original = "./input/"+input_file
   cheek_layer = "./output/CheekLayer.png"
   eyeshadow_layer = "./output/eyeshadow_modified2.0.png"
   eyebrow_layer = "./output/eyebrow2.0.png"
   lip_layer = "./output/lip_layer.png"
-  cloth_layer = "./cloth_pattern.png"
+  cloth_layer = "./cloth_without_hair_pattern.png"
+
+
 
   layer1 = Image.open(original).convert("RGBA")
   layer2 = Image.open(cheek_layer).convert("RGBA")
   layer3 = Image.open(eyeshadow_layer).convert("RGBA")
   layer4 = Image.open(eyebrow_layer).convert("RGBA")
   layer5 = Image.open(lip_layer).convert("RGBA")
+
   layer6 = Image.open(cloth_layer).convert("RGBA")
 
-  S = Image.alpha_composite(layer1, layer2)
-  S = Image.alpha_composite(S, layer3)
-  S = Image.alpha_composite(S, layer4)
-  S = Image.alpha_composite(S, layer5)
 
-  S1 = Image.alpha_composite(S, layer6)
+
+  Makeup_result = Image.alpha_composite(layer1, layer2)
+  Makeup_result = Image.alpha_composite(Makeup_result, layer3)
+  Makeup_result = Image.alpha_composite(Makeup_result, layer4)
+  Makeup_result = Image.alpha_composite(Makeup_result, layer5) #레이어 쌓아 올리기
+
+
+  SwapClothes = Image.alpha_composite(layer1, layer6) #옷 입힘
+  SwapClothes = Image.alpha_composite(SwapClothes, layer2) #cheek_layer
+  SwapClothes = Image.alpha_composite(SwapClothes, layer3)  # eyeshadow_layer
+  SwapClothes = Image.alpha_composite(SwapClothes, layer4)  # eyebrow_layer
+  SwapClothes = Image.alpha_composite(SwapClothes, layer5)  # lip_layer
 
   fig = plt.figure()
   rows = 1
@@ -270,12 +297,12 @@ while True:
   ax1.set_xticks([]), ax1.set_yticks([])
 
   ax2 = fig.add_subplot(rows, cols, 2)
-  ax2.imshow(S)
+  ax2.imshow(Makeup_result)
   ax2.set_xlabel('After')
   ax2.set_xticks([]), ax2.set_yticks([])
 
   ax2 = fig.add_subplot(rows, cols, 3)
-  ax2.imshow(S1)
+  ax2.imshow(SwapClothes)
   ax2.set_xlabel('Swap Clothes')
   ax2.set_xticks([]), ax2.set_yticks([])
 
