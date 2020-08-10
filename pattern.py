@@ -33,6 +33,7 @@ def canny_is_zero(a,b,c):
     if(a==0 and b == 0 and c==0):
         return True
     return False
+
 def get_pattern(pattern_file):
     img = cv2.imread("./cloth.png")
     width = img.shape[1]
@@ -78,5 +79,6 @@ def get_pattern(pattern_file):
             B = cloth_datas[i][2]
             newData_pattern.append((cal_pattern(R, pattern_datas[i][0]),cal_pattern(G, pattern_datas[i][1]),cal_pattern(B, pattern_datas[i][2]),255))  # 해당 영역 추가
     img.putdata(newData_pattern)  # 데이터 입력
-    img.save("cloth_pattern.png")  # 이미지name으로 저장
+    number = pattern_file.split(".")[0][-1]
+    img.save("cloth_pattern"+str(number)+".png")  # 이미지name으로 저장
 

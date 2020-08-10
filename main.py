@@ -13,7 +13,7 @@ import os
 # Illust Flag => True이면 Cartoon GAN 적용 후 Face Layer 추출, False이면 미적용, 추출
 convert_to_illust = False
 Remove_BG=True
-Get_HairSeg=True
+Get_HairSeg=False
 FileName = "mental.png"
 
 input_file=""
@@ -36,8 +36,10 @@ modelpath = "./light_shinkai_ckpt"
 img_path = ImgName
 out_dir = './output/'
 
-print("Enter the Pattern Image : ", end='')
-pattern_file = input()
+pattern_file = ["pattern1.png","pattern2.png","pattern3.png","pattern4.png","pattern5.png","pattern6.jpg"]
+
+print("Pattern List : ",end='')
+print(pattern_file)
 if(convert_to_illust):
   import inference_with_ckpt as illustrator
   illustrator.convert(modelpath, img_path,out_dir)
@@ -241,15 +243,18 @@ while True:
   U.bitwise_masking(img_Name,end_of_face)
 
   original = "./input/"+input_file
-  pattern.get_pattern(pattern_file)
+  for pattern_source in pattern_file:
+    pattern.get_pattern(pattern_source)
 
   if (Get_HairSeg):
     import hair_segmentation as HS
     os.environ["KERAS_BACKEND"] = "tensorflow"
     HS.hair_segment(original) #hair segmentation작업
-    U.accumulate_hair_layer() #레이어 쌓기
+    #U.accumulate_hair_layer() #레이어 쌓기
     U.remove_hair_from_clothes(max_y_from_face) # 마스킹작업
-
+    cloth_layer = "./cloth_without_hair_pattern.png"
+  else:
+    cloth_layer = "./cloth_pattern1.png"
 
   print("[Extraction] Cloth Layer Complete .... ")
   print("=====")
@@ -262,7 +267,6 @@ while True:
   eyeshadow_layer = "./output/eyeshadow_modified2.0.png"
   eyebrow_layer = "./output/eyebrow2.0.png"
   lip_layer = "./output/lip_layer.png"
-  cloth_layer = "./cloth_without_hair_pattern.png"
 
 
 

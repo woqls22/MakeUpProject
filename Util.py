@@ -951,7 +951,7 @@ def eyebrow_masking(origin_src, out_addr,center_point):
   faces = detector(img_gray)
   lp=[]
   rp =[]
-  max_alpha=60
+  max_alpha=40
   for face in faces:
     landmarks = predictor(img_gray, face)
     landmarks_points = []
@@ -1383,17 +1383,17 @@ def remove_hair_from_clothes(max_y_from_face):
 
 
 def accumulate_hair_layer():
-  layer1 = Image.open("./hair_crop_transparent/crop_hair0.png").convert("RGBA")
-  layer2 = Image.open("./hair_crop_transparent/crop_hair1.png").convert("RGBA")
-  layer3 = Image.open("./hair_crop_transparent/crop_hair2.png").convert("RGBA")
+  layer1 = Image.open("./hair_crop_transparent/crop_hair.png").convert("RGBA")
+  #layer2 = Image.open("./hair_crop_transparent/crop_hair1.png").convert("RGBA")
+  #layer3 = Image.open("./hair_crop_transparent/crop_hair2.png").convert("RGBA")
   layer4 = Image.open("./hair_crop_transparent/crop_hair3.png").convert("RGBA")
-  layer5 = Image.open("./hair_crop_transparent/crop_hair4.png").convert("RGBA")
-  layer6 = Image.open("./hair_crop_transparent/crop_hair5.png").convert("RGBA")
+  #layer5 = Image.open("./hair_crop_transparent/crop_hair4.png").convert("RGBA")
+  #layer6 = Image.open("./hair_crop_transparent/crop_hair5.png").convert("RGBA")
 
-  result = Image.alpha_composite(layer1, layer2)
-  result = Image.alpha_composite(result, layer3)
-  result = Image.alpha_composite(result, layer4)
-  result = Image.alpha_composite(result, layer5)
-  result = Image.alpha_composite(result, layer6)
+  #result = Image.alpha_composite(layer1, layer2)
+  #result = Image.alpha_composite(result, layer3)
+  #result = Image.alpha_composite(result, layer4)
+  #result = Image.alpha_composite(result, layer5)
+  #result = Image.alpha_composite(result, layer6)
 
-  result.save("./hair_crop_transparent/crop_hair.png")
+  layer1.save("./hair_crop_transparent/crop_hair.png")
