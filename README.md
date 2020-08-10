@@ -4,7 +4,7 @@
 - 실사 사진 바탕 화장 및 Clothes Swap 프로젝트
 
 - 실행 결과
-<img src= "./Resources/suzy1.png">
+<img src= "./Resources/result.JPG">
 
 ## Env
 - Python 3.6
@@ -30,6 +30,7 @@
 - [X] Convert 2D Pattern to 3D style [20.08.05]
 - [X] Clothes Layer Extraction 정확도 개선 작업 [20.08.06]
 - [X] Hair Segmentation 구현(딥러닝 모델 사용) [20.08.06]
+- [X] Source Pattern별 각 clothes layer 출력 구현[20.08.10]
 
 #### MakeUp Result 전/후
 
@@ -78,7 +79,7 @@
 - Added : Clothes Layer Extraction [20.08.03]
 - Added : Apply alpha value for each layer [20.08.04]
 - Added : Clothes Texture Swap Module [20.08.05]
-
+- Modified : Pattern List Applied [20.08.10]
 ## Lisence
 MIT License
 
