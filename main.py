@@ -12,8 +12,13 @@ import os
 # Picture FileName
 # Illust Flag => True이면 Cartoon GAN 적용 후 Face Layer 추출, False이면 미적용, 추출
 convert_to_illust = False
-Remove_BG=True
+Remove_BG=False
 Get_HairSeg=False
+R=0
+G=0
+B=255
+# color setting
+
 FileName = "mental.png"
 
 input_file=""
@@ -194,7 +199,7 @@ while True:
     right_eyes_brow_img = U.extract_part(REB_ori, right_eyes_brow)
 
   # visualize
-  U.get_cheek_layer(cheek_ori, points_for_leftcheek, points_for_rightcheek, face_line,points_for_nosecheek[0][0])
+  U.get_cheek_layer(cheek_ori, points_for_leftcheek, points_for_rightcheek, face_line,points_for_nosecheek[0][0],R,G,B)
   cv2.imwrite(out_dir+'cheek_colored'+version+'.png',cheek_ori)
   # Img Write
   cv2.imwrite(out_dir+'mouse'+version+'.png',mouse_img)
@@ -202,20 +207,20 @@ while True:
   cv2.imwrite(out_dir+'right_eyes_img'+version+'.png', right_eyes_img )
   cv2.imwrite(out_dir+'nose_img'+version+'.png', nose_img )
   cv2.imwrite(out_dir+'face_line_img'+version+'.png', face_line_img)
-  U.eyebrow_masking(img_path, './output/eyebrow' + version + '.png',points_for_nosecheek[0][0])
+  U.eyebrow_masking(img_path, './output/eyebrow' + version + '.png',points_for_nosecheek[0][0],R,G,B)
 
   cv2.imwrite(out_dir+'left_eyes_brow_img'+version+'.png', left_eyes_brow_img )
   cv2.imwrite(out_dir+'right_eyes_brow_img'+version+'.png', right_eyes_brow_img )
-  U.eyeshadow_Extract(img_path, './output/eyeshadow_modified' + version + '.png', points_for_nosecheek[0][0])
+  U.eyeshadow_Extract(img_path, './output/eyeshadow_modified' + version + '.png', points_for_nosecheek[0][0],R,G,B)
   print("mouse Layer Extract [Path] : " + out_dir+'mouse'+version+'.png')
   print("left_eyes_img Layer Extract [Path] : " + out_dir+'left_eyes_img'+version+'.png')
   print("right_eyes_img Layer Extract [Path] : " + out_dir+'right_eyes_img'+version+'.png')
   print("nose_img Layer Extract [Path] : " + out_dir+'nose_img'+version+'.png')
   print("face_line_img Layer Extract [Path] : " + out_dir+'face_line_img'+version+'.png')
   lip_fname = out_dir+'mouse'+version+'.png'
-  U.get_lip_layer(ImgName,mouse)
+  U.get_lip_layer(ImgName,mouse,R,G,B)
 
-  #U.get_eyebrow_layer(ImgName, left_eyes_brow, right_eyes_brow)
+  U.get_eyebrow_layer(ImgName, left_eyes_brow, right_eyes_brow)
 
 
   x = []
@@ -277,13 +282,16 @@ while True:
   layer5 = Image.open(lip_layer).convert("RGBA")
 
   layer6 = Image.open(cloth_layer).convert("RGBA")
-
+  layer7 = Image.open("./output/eyeline.png").convert("RGBA")
 
 
   Makeup_result = Image.alpha_composite(layer1, layer2)
   Makeup_result = Image.alpha_composite(Makeup_result, layer3)
   Makeup_result = Image.alpha_composite(Makeup_result, layer4)
   Makeup_result = Image.alpha_composite(Makeup_result, layer5) #레이어 쌓아 올리기
+  Makeup_result = Image.alpha_composite(Makeup_result, layer7)
+  Makeup_result.save("result/Makeup_result.png")  # 이미지name으로 저장
+
 
 
   SwapClothes = Image.alpha_composite(layer1, layer6) #옷 입힘
@@ -291,6 +299,7 @@ while True:
   SwapClothes = Image.alpha_composite(SwapClothes, layer3)  # eyeshadow_layer
   SwapClothes = Image.alpha_composite(SwapClothes, layer4)  # eyebrow_layer
   SwapClothes = Image.alpha_composite(SwapClothes, layer5)  # lip_layer
+  SwapClothes.save("result/SwapClothes.png")
 
   fig = plt.figure()
   rows = 1
