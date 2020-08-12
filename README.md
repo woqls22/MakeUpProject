@@ -31,6 +31,7 @@
 - [X] Clothes Layer Extraction 정확도 개선 작업 [20.08.06]
 - [X] Hair Segmentation 구현(딥러닝 모델 사용) [20.08.06]
 - [X] Source Pattern별 각 clothes layer 출력 구현[20.08.10]
+- [X] Eyeline layer 구현[20.08.12]
 
 #### MakeUp Result 전/후
 
