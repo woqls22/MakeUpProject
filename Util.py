@@ -1474,26 +1474,39 @@ def get_eyeline(img, faces, landmarks,R,G,B):
     right_eye.append((right_eye[-1][0] + int(right_width/2), right_eye[-1][1] + int(right_height/2)))
     left_eye.append((left_eye[-1][0] - int(left_width / 4), left_eye[-1][1] + int(left_height / 4)))
     right_eye.append((right_eye[-1][0] + int(right_width / 4), right_eye[-1][1] + int(right_height / 4)))
-
+    left_eye.append((left_eye[-1][0] - int(left_width / 4), left_eye[-1][1] + int(left_height / 4)))
+    right_eye.append((right_eye[-1][0] + int(right_width / 4), right_eye[-1][1] + int(right_height / 4)))
+    left_eye.append((left_eye[-1][0] - int(left_width / 4), left_eye[-1][1] + int(left_height / 4)))
+    right_eye.append((right_eye[-1][0] + int(right_width / 4), right_eye[-1][1] + int(right_height / 4)))
+    left_eye.append((left_eye[-1][0] - int(left_width / 4), left_eye[-1][1] + int(left_height / 4)))
+    right_eye.append((right_eye[-1][0] + int(right_width / 4), right_eye[-1][1] + int(right_height / 4)))
+    left_eye.append((left_eye[-1][0] - int(left_width / 4), left_eye[-1][1] + int(left_height / 4)))
+    right_eye.append((right_eye[-1][0] + int(right_width / 4), right_eye[-1][1] + int(right_height / 4)))
     width = img.shape[1]
     height = img.shape[0]
 
     for i in range(len(left_eye)-1):
       if(i>=9):
         cv2.line(img, (left_eye[i][0], left_eye[i][1]), (left_eye[i + 1][0], left_eye[i + 1][1]), color=(0, 0, 255),
-                 thickness=int(right_height / 2), lineType=cv2.LINE_AA)
+                 thickness=get_thickness(int(right_height / 2)), lineType=cv2.LINE_AA)
       else:
         cv2.line(img, (left_eye[i][0], left_eye[i][1]), (left_eye[i + 1][0], left_eye[i + 1][1]), color=(0, 0, 255),
-                 thickness=int(right_height / 1), lineType=cv2.LINE_AA)
+                 thickness=get_thickness(int(right_height / 1)), lineType=cv2.LINE_AA)
 
     for i in range(len(right_eye)-1):
       if(i>=10):
         print(i)
-        cv2.line(img, (right_eye[i][0],right_eye[i][1]), (right_eye[i+1][0],right_eye[i+1][1]), color = (0,0,255), thickness = int(right_height / 2), lineType=cv2.LINE_AA)
+        cv2.line(img, (right_eye[i][0],right_eye[i][1]), (right_eye[i+1][0],right_eye[i+1][1]), color = (0,0,255), thickness = get_thickness(int(right_height / 2)), lineType=cv2.LINE_AA)
       else:
-        cv2.line(img, (right_eye[i][0],right_eye[i][1]), (right_eye[i+1][0],right_eye[i+1][1]), color = (0,0,255), thickness = int(right_height / 1), lineType=cv2.LINE_AA)
+        cv2.line(img, (right_eye[i][0],right_eye[i][1]), (right_eye[i+1][0],right_eye[i+1][1]), color = (0,0,255), thickness = get_thickness(int(right_height / 1)), lineType=cv2.LINE_AA)
+
+
 
     cv2.imwrite("output/eyeline.png", img)
+
+    # img = cv2.imread("output/eyeline.png")
+    # img = cv2.GaussianBlur(img, (3, 3), 2)
+    # cv2.imwrite("output/eyeline.png", img)
 
     img = Image.open("output/eyeline.png")
     img = img.convert("RGBA")
@@ -1504,7 +1517,7 @@ def get_eyeline(img, faces, landmarks,R,G,B):
     for item in datas:
       x = x + 1
       if (item[0] == 255 and item[1] == 0 and item[2] == 0 and item[3]==255):
-        newData.append((R, G, B, 130))
+        newData.append((R, G, B, 100))
       else:
         newData.append((255, 255, 255, 0))
       if (x >= width):
@@ -1516,7 +1529,11 @@ def get_eyeline(img, faces, landmarks,R,G,B):
     img.save(imgname, "PNG")
 
 
-
+def get_thickness(a):
+  if(a<=0):
+    return 1
+  else :
+    return a
 
 def accumulate_hair_layer():
   layer1 = Image.open("./hair_crop_transparent/crop_hair.png").convert("RGBA")
