@@ -251,7 +251,7 @@ def get_cheek_layer(cheek_ori, left_cheekpoint, right_cheekpoint, face_line, cen
   Lx, Ly = GetIntersetLeftPoints2D(left_cheekpoint)
   Rx, Ry = GetIntersetRightPoints2D(right_cheekpoint)
   inter_val = 0.4 # 중심 값 이동 변수'
-  max_alpha = 32
+  max_alpha = 40
   weight_X = 1.4 # X좌표 가중치. 값이 커질수록 X축기준 흐려짐 심함
   weight_Y = 1  # Y 좌표 가중치. 값이 커질수록 Y축기준 흐려짐 심함
   Left_facedot = []
@@ -440,7 +440,7 @@ def get_lip_layer(imgname, mouse,R,G,B):
   y = 0
   x_list=[]
   y_list=[]
-  max_alpha = 50
+  max_alpha = 100
   for i in mouse:
     x_list.append(i[0])
     y_list.append(i[1])
@@ -476,14 +476,15 @@ def get_lip_layer(imgname, mouse,R,G,B):
       if (not (item[0]==255 and item[1] == 255 and item[2] == 255)):
         newData.append((255, 255, 255, 0))
       else:
-        distance = math.sqrt(((center_x - x)*0.5) ** 2 + ((center_y - y)*1.7) ** 2)
-        newData.append((R, G, B, int(max_alpha - normalization(distance, max_val, min_val)*1300)))
+        distance = math.sqrt(abs(((center_x - x)*0.45) ** 4) + abs(((center_y - y)*0.85) ** 4))
+        newData.append((R, G, B, int(max_alpha - normalization(distance, max_val, min_val)*100)))
       if (x >= width):
         y = y + 1
         x = 0
 
     img.putdata(newData)
     imgname = "./output/lip_layer.png"
+    print("lip  Layer Extract [Path] : ./output/lip_layer.png")
     img.save(imgname, "PNG")
 
 def get_eyebrow_layer(imgname, lefteyebrow, righteyebrow):
@@ -1406,14 +1407,15 @@ def get_eyeline(img, faces, landmarks,R,G,B):
   img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
   left_eye = []
   right_eye = []
-  cal_height=[]
+  calculation=[]
   for face in faces:
     x, y = get_xy_from_landmark(landmarks, 48)
-    cal_height.append(y)
+    calculation.append((x,y))
     x, y = get_xy_from_landmark(landmarks, 49)
-    cal_height.append(y)
+    calculation.append((x,y))
 
-    move_up_pixel = int(abs(cal_height[1]-cal_height[0])/1.8)
+    move_up_pixel = int(abs(calculation[1][1]-calculation[0][1])/1.8)
+    move_side_pixel = int(abs(calculation[1][0] - calculation[0][0]) / 1.5)
 
     x, y = get_xy_from_landmark(landmarks, 48)
     left_eye.append((x, y-move_up_pixel))
@@ -1428,17 +1430,19 @@ def get_eyeline(img, faces, landmarks,R,G,B):
     x, y = get_xy_from_landmark(landmarks, 55)
     left_eye.append((x, y-move_up_pixel))
     x, y = get_xy_from_landmark(landmarks, 56)
-    left_eye.append((x, y-move_up_pixel))
+    left_eye.append((x-move_side_pixel, y-move_up_pixel))
     x, y = get_xy_from_landmark(landmarks, 57)
-    left_eye.append((x, y-move_up_pixel))
-    move_up_pixel = int(abs(cal_height[1]-cal_height[0])/1.6)
+    left_eye.append((x-move_side_pixel, y-move_up_pixel))
+    move_up_pixel = int(abs(calculation[1][1]-calculation[0][1])/1.6)
+    move_side_pixel = int(abs(calculation[1][0] - calculation[0][0]) / 1)
     x, y = get_xy_from_landmark(landmarks, 58)
-    left_eye.append((x, y-move_up_pixel))
+    left_eye.append((x-move_side_pixel, y-move_up_pixel))
     x, y = get_xy_from_landmark(landmarks, 59)
-    left_eye.append((x, y-move_up_pixel))
+    left_eye.append((x-move_side_pixel, y-move_up_pixel))
     left_width = abs(left_eye[-1][0]-left_eye[-2][0])
     left_height = abs(left_eye[-1][1]-left_eye[-2][1])
-    move_up_pixel = int(abs(cal_height[1]-cal_height[0])/1.8)
+    move_side_pixel = int(abs(calculation[1][0] - calculation[0][0]) / 1.5)
+    move_up_pixel = int(abs(calculation[1][1]-calculation[0][1])/1.8)
     x, y = get_xy_from_landmark(landmarks, 26)
     right_eye.append((x, y-move_up_pixel))
     x, y = get_xy_from_landmark(landmarks, 27)
@@ -1454,13 +1458,14 @@ def get_eyeline(img, faces, landmarks,R,G,B):
     x, y = get_xy_from_landmark(landmarks, 33)
     right_eye.append((x, y-move_up_pixel))
     x, y = get_xy_from_landmark(landmarks, 34)
-    right_eye.append((x, y-move_up_pixel))
+    right_eye.append((x+move_side_pixel, y-move_up_pixel))
     x, y = get_xy_from_landmark(landmarks, 35)
-    right_eye.append((x, y-move_up_pixel))
+    right_eye.append((x+move_side_pixel, y-move_up_pixel))
     x, y = get_xy_from_landmark(landmarks, 36)
-    right_eye.append((x, y-move_up_pixel))
+    move_side_pixel = int(abs(calculation[1][0] - calculation[0][0]) / 1)
+    right_eye.append((x+move_side_pixel, y-move_up_pixel))
     x, y = get_xy_from_landmark(landmarks, 37)
-    right_eye.append((x, y-move_up_pixel))
+    right_eye.append((x+move_side_pixel, y-move_up_pixel))
 
     right_width = abs(right_eye[-1][0] - right_eye[-2][0])
     right_height =  abs(right_eye[-1][1] - right_eye[-2][1])
@@ -1472,11 +1477,21 @@ def get_eyeline(img, faces, landmarks,R,G,B):
 
     width = img.shape[1]
     height = img.shape[0]
+
     for i in range(len(left_eye)-1):
-      cv2.line(img, (left_eye[i][0],left_eye[i][1]), (left_eye[i+1][0],left_eye[i+1][1]), color = (0,0,255), thickness = 4, lineType=cv2.LINE_AA)
+      if(i>=9):
+        cv2.line(img, (left_eye[i][0], left_eye[i][1]), (left_eye[i + 1][0], left_eye[i + 1][1]), color=(0, 0, 255),
+                 thickness=int(right_height / 2), lineType=cv2.LINE_AA)
+      else:
+        cv2.line(img, (left_eye[i][0], left_eye[i][1]), (left_eye[i + 1][0], left_eye[i + 1][1]), color=(0, 0, 255),
+                 thickness=int(right_height / 1), lineType=cv2.LINE_AA)
 
     for i in range(len(right_eye)-1):
-      cv2.line(img, (right_eye[i][0],right_eye[i][1]), (right_eye[i+1][0],right_eye[i+1][1]), color = (0,0,255), thickness = 4, lineType=cv2.LINE_AA)
+      if(i>=10):
+        print(i)
+        cv2.line(img, (right_eye[i][0],right_eye[i][1]), (right_eye[i+1][0],right_eye[i+1][1]), color = (0,0,255), thickness = int(right_height / 2), lineType=cv2.LINE_AA)
+      else:
+        cv2.line(img, (right_eye[i][0],right_eye[i][1]), (right_eye[i+1][0],right_eye[i+1][1]), color = (0,0,255), thickness = int(right_height / 1), lineType=cv2.LINE_AA)
 
     cv2.imwrite("output/eyeline.png", img)
 
@@ -1489,7 +1504,7 @@ def get_eyeline(img, faces, landmarks,R,G,B):
     for item in datas:
       x = x + 1
       if (item[0] == 255 and item[1] == 0 and item[2] == 0 and item[3]==255):
-        newData.append((R, G, B, 80))
+        newData.append((R, G, B, 130))
       else:
         newData.append((255, 255, 255, 0))
       if (x >= width):
