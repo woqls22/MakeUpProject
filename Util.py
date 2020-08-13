@@ -4,6 +4,8 @@ import numpy as np
 from PIL import Image
 import math
 import os
+from PIL import ImageFilter
+
 os.environ["KERAS_BACKEND"] = "tensorflow"
 MAKE_TRANSPARENT = True
 
@@ -332,6 +334,8 @@ def get_cheek_layer(cheek_ori, left_cheekpoint, right_cheekpoint, face_line, cen
     print("Cheek Layer Extract [Path] : " + imgname)
     img.save(imgname, "PNG")
 def normalization(distance,Max_val, Min_val): #정규화 max, min 사이 값으로 변경
+  if((Max_val-Min_val) == 0 ):
+    return 0
   return (distance-Min_val)/(Max_val-Min_val)
 
 def cal_min_max(fname,Rx,Ry,Lx,Ly,center_point, B,G,R):
@@ -413,7 +417,7 @@ def get_curve(Set):
     Set.append(get_center_point(Set[i-1], Set[i]))
   return np.array(Set, np.int32)
 
-def cal_min_max_center(fname,Cx,Cy):
+def cal_min_max_center(fname,Cx,Cy,weight_x,weight_y):
   img = Image.open(fname)
   opencv_img = cv2.imread(fname)
   width = opencv_img.shape[1]
@@ -425,7 +429,45 @@ def cal_min_max_center(fname,Cx,Cy):
   distance=[]
   for item in datas:
     x = x + 1
-    distance.append(int(math.sqrt((Cx-x)**2+(Cy-y)**2)))
+    if(item[0]==255 and item[1]==255 and item[2] == 255 and item[3] == 255):
+      distance.append(int(math.sqrt((((Cx-x)*weight_x)**2)+(((Cy-y)*weight_y)**2))))
+    if (x >= width):
+      y = y + 1
+      x = 0
+  return min(distance),max(distance)
+def upper_cal_min_max_weight(fname,Cx,Cy,weight_X,weight_Y, center):
+  img = Image.open(fname)
+  opencv_img = cv2.imread(fname)
+  width = opencv_img.shape[1]
+  height = opencv_img.shape[0]
+  img = img.convert("RGBA")
+  x = -1
+  y = 0
+  datas = img.getdata()
+  distance=[]
+  for item in datas:
+    x = x + 1
+    if(item[0]== 255 and item[1] == 255 and item[2] == 255 and item[3] == 255 and y<center):
+      distance.append(math.sqrt(((Cx-x)*(weight_X))**2+(((Cy-y)*(weight_Y))**2)))
+    if (x >= width):
+      y = y + 1
+      x = 0
+  return min(distance),max(distance)
+
+def lower_cal_min_max_weight(fname,Cx,Cy,weight_X,weight_Y, center):
+  img = Image.open(fname)
+  opencv_img = cv2.imread(fname)
+  width = opencv_img.shape[1]
+  height = opencv_img.shape[0]
+  img = img.convert("RGBA")
+  x = -1
+  y = 0
+  datas = img.getdata()
+  distance=[]
+  for item in datas:
+    x = x + 1
+    if(item[0]== 255 and item[1] == 255 and item[2] == 255 and item[3] == 255 and y>center):
+      distance.append(math.sqrt(((Cx-x)*(weight_X))**2+(((Cy-y)*(weight_Y))**2)))
     if (x >= width):
       y = y + 1
       x = 0
@@ -435,7 +477,8 @@ def get_lip_layer(imgname, mouse,R,G,B):
   img = cv2.imread(imgname)
   img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
   mouse_mask = np.zeros_like(img_gray)
-
+  weight_X=0.45
+  weight_Y=0.85
   x = -1
   y = 0
   x_list=[]
@@ -468,15 +511,14 @@ def get_lip_layer(imgname, mouse,R,G,B):
 
     center_x = int((min_x+max_x)/2)
     center_y = int((min_y + max_y) / 2)
-    min_val, max_val = cal_min_max_center(imgname, center_x,center_y)  # 정규화를 위한 최대 최소 계산
-    centerLip_color = opencv_img[center_y,center_x]
+    min_val, max_val = cal_min_max_center("mouse_mask.png", center_x,center_y, weight_X, weight_Y)  # 정규화를 위한 최대 최소 계산
     for item in datas:
       x = x + 1
       #and Lip_Similar_with_point(centerLip_color, item)
       if (not (item[0]==255 and item[1] == 255 and item[2] == 255)):
         newData.append((255, 255, 255, 0))
       else:
-        distance = math.sqrt(abs(((center_x - x)*0.45) ** 4) + abs(((center_y - y)*0.85) ** 4))
+        distance = math.sqrt(abs(((center_x - x)*weight_X)**2) + abs(((center_y - y)*weight_Y) ** 2))
         newData.append((R, G, B, int(max_alpha - normalization(distance, max_val, min_val)*100)))
       if (x >= width):
         y = y + 1
@@ -1495,7 +1537,6 @@ def get_eyeline(img, faces, landmarks,R,G,B):
 
     for i in range(len(right_eye)-1):
       if(i>=10):
-        print(i)
         cv2.line(img, (right_eye[i][0],right_eye[i][1]), (right_eye[i+1][0],right_eye[i+1][1]), color = (0,0,255), thickness = get_thickness(int(right_height / 2)), lineType=cv2.LINE_AA)
       else:
         cv2.line(img, (right_eye[i][0],right_eye[i][1]), (right_eye[i+1][0],right_eye[i+1][1]), color = (0,0,255), thickness = get_thickness(int(right_height / 1)), lineType=cv2.LINE_AA)
@@ -1550,3 +1591,111 @@ def accumulate_hair_layer():
   #result = Image.alpha_composite(result, layer6)
 
   layer1.save("./hair_crop_transparent/crop_hair.png")
+
+def opened_mouse_layer(imgsrc,R,G,B):
+  img = cv2.imread(imgsrc)
+  img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+  lip_mask = np.zeros_like(img_gray)
+  weight_Y = 1
+  weight_X = 0.4
+  maxalpha = 90
+  detector = dlib.get_frontal_face_detector()
+  predictor = dlib.shape_predictor("shape_predictor_194_face_landmarks.dat")
+  faces = detector(img_gray)
+  for face in faces:
+    landmarks = predictor(img_gray, face)
+    landmarks_points = []
+
+    # 입술
+    for n in range(11, 21):
+      x = landmarks.part(n).x
+      y = landmarks.part(n).y
+      landmarks_points.append((x, y))
+      if(n == 18):
+        Bx = landmarks.part(n).x
+        By = landmarks.part(n).y
+        Cy = landmarks.part(n).y
+    for n in range(22, 26):
+      x = landmarks.part(n).x
+      y = landmarks.part(n).y
+      landmarks_points.append((x, y))
+    for n in range(152, 194):
+      x = landmarks.part(n).x
+      y = landmarks.part(n).y
+      if (n == 172):
+        By = int((By+landmarks.part(n).y)/2)
+      if(n == 158):
+        Ax = landmarks.part(n).x
+        Ay = landmarks.part(n).y
+      if(n==186):
+        Ay = int((Ay+landmarks.part(n).y)/2)
+        Cy = int((Cy+landmarks.part(n).y)/2)
+      landmarks_points.append((x, y))
+
+    points = np.array(landmarks_points, np.int32)
+
+    convexhull = []
+    ##### 아랫입술 ###### 6
+    convexhull.append(cv2.convexHull(points[[0, 27, 28]]))
+    convexhull.append(cv2.convexHull(points[[0, 1, 2, 3, 28, 29, 30, 31]]))
+    convexhull.append(cv2.convexHull(points[[3, 4, 5, 6, 31, 32, 33, 34]]))
+    convexhull.append(cv2.convexHull(points[[6, 7, 8, 9, 34, 35, 36]]))
+    convexhull.append(cv2.convexHull(points[[9, 10, 11, 12, 36, 37, 38, 39]]))
+    convexhull.append(cv2.convexHull(points[[12, 13, 39, 40, 41]]))
+    ##### 윗입술 ##### 10
+    convexhull.append(cv2.convexHull(points[[14, 15, 42, 43]]))
+    convexhull.append(cv2.convexHull(points[[15, 16, 17, 43, 44, 45]]))
+    convexhull.append(cv2.convexHull(points[[17, 18, 45, 46]]))
+    convexhull.append(cv2.convexHull(points[[18, 19, 46, 47]]))
+    convexhull.append(cv2.convexHull(points[[19, 20, 47, 48]]))
+    convexhull.append(cv2.convexHull(points[[20, 21, 48, 49]]))
+    convexhull.append(cv2.convexHull(points[[21, 22, 49, 50, 51]]))
+    convexhull.append(cv2.convexHull(points[[22, 23, 51, 52]]))
+    convexhull.append(cv2.convexHull(points[[23, 24, 52, 53, 54]]))
+    convexhull.append(cv2.convexHull(points[[24, 25, 26, 54, 55]]))
+    ## 중간 ##
+    convexhull.append(cv2.convexHull(points[[26, 27, 55]]))
+    convexhull.append(cv2.convexHull(points[[14, 41, 42]]))
+    convexhull.append(cv2.convexHull(points[[13, 41, 42]]))
+
+    for con in convexhull:
+      cv2.polylines(img, [con], True, (255, 0, 0), 1)
+      cv2.fillConvexPoly(lip_mask, con, 255)
+
+    lip_image = cv2.bitwise_and(img, img, mask=lip_mask)
+
+  # file 저장
+  width = lip_mask.shape[1]
+  height  = lip_mask.shape[0]
+  cv2.imwrite("./output/opened_lip.PNG", lip_mask)
+
+  # masking한 부분만 놓고 나머지 배경 투명하게 처리
+  x=-1
+  y=0
+  MAKE_TRANSPARENT = True
+
+  if (MAKE_TRANSPARENT):
+    img = Image.open("./output/opened_lip.PNG")  # 파일 열기
+    img = img.convert("RGBA")  # RGBA형식으로 변환
+
+    datas = img.getdata()  # datas에 일차원 배열 형식으로 RGBA입력
+    newData = []
+
+    upper_min_val, upper_max_val = upper_cal_min_max_weight("./output/opened_lip.PNG", Ax,Ay,weight_X,weight_Y, Cy)  # 정규화를 위한 최대 최소 계산
+    lower_min_val, lower_max_val = lower_cal_min_max_weight("./output/opened_lip.PNG", Bx,By,weight_X,weight_Y,Cy)
+    for item in datas:
+      x=x+1
+      if (item[0] == 255 and item[1] == 255 and item[2] == 255 and y<=Cy):  # 해당 픽셀 색이 흰색이면 해당 영역 추가
+        distance = math.sqrt((((Ax - x) * weight_X) ** 2) + (((Ay - y) * weight_Y) ** 2))
+        newData.append((R, G, B,int(maxalpha-normalization(distance,upper_max_val,upper_min_val)*100)))
+      elif (item[0] == 255 and item[1] == 255 and item[2] == 255 and y > Cy):
+        distance = math.sqrt((((Bx - x) * weight_X) ** 2) + (((By - y) * weight_Y) ** 2))
+        newData.append((R, G, B, int(maxalpha-normalization(distance,lower_max_val,lower_min_val)*100)))
+      else:  # 그렇지 않으면
+        newData.append((255, 0, 0, 0))  # 투명 추가
+      if (x >= width):
+        y = y + 1
+        x = 0
+    img.putdata(newData)  # 데이터 입력
+    # img = img.filter(ImageFilter.GaussianBlur(radius=1))
+    img.save("./output/opened_lip.PNG")

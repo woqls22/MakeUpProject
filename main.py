@@ -12,11 +12,11 @@ import os
 # Picture FileName
 # Illust Flag => True이면 Cartoon GAN 적용 후 Face Layer 추출, False이면 미적용, 추출
 convert_to_illust = False
-Remove_BG=False
+Remove_BG=True
 Get_HairSeg=False
-R=0
+R=255
 G=0
-B=255
+B=0
 # color setting
 
 FileName = "mental.png"
@@ -40,7 +40,7 @@ version="2.0"
 modelpath = "./light_shinkai_ckpt"
 img_path = ImgName
 out_dir = './output/'
-
+U.opened_mouse_layer(img_Name, R,G,B)
 pattern_file = ["pattern1.png","pattern2.png","pattern3.png","pattern4.png","pattern5.png","pattern6.jpg"]
 
 print("Pattern List : ",end='')
