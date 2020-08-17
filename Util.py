@@ -224,7 +224,8 @@ def get_Crop_point(part):
   maxY = max(y)
   return minX, maxX, minY, maxY
 def is_in_Area(x,y,minX,maxX,minY,maxY):
-  if(x<=maxX and x>=minX and y>=minY and y<=maxY):
+  gap = int((maxX-minX)/15)
+  if(x<=maxX-gap and x>=minX+gap and y>=minY+gap and y<=maxY-gap):
     return True
   else:
     return False
@@ -528,7 +529,7 @@ def get_lip_layer(imgname, mouse,R,G,B, max_alpha):
     print("lip  Layer Extract [Path] : ./output/lip_layer.png")
     img.save(imgname, "PNG")
 
-def get_eyebrow_layer(imgname, lefteyebrow, righteyebrow):
+def get_eyebrow_layer(imgname, lefteyebrow, righteyebrow, maxAlpha):
   x = -1
   y = 0
   l_x_list=[]
@@ -572,9 +573,9 @@ def get_eyebrow_layer(imgname, lefteyebrow, righteyebrow):
 
     for item in datas:
       if((is_in_Area(x,y,lefteyebrowmin_x,lefteyebrowmax_x,lefteyebrowmin_y,lefteyebrowmax_y) and Eyebrow_Similar_with_point(left_center_eyebrow_color, item))):
-        newData.append((255,255,255,60))
+        newData.append((255,255,255,maxAlpha))
       elif((is_in_Area(x, y, righteyebrowmin_x, righteyebrowmax_x, righteyebrowmin_y, righteyebrowmax_y) and (Eyebrow_Similar_with_point(right_center_eyebrow_color, item)))):
-        newData.append((255,255,255,60))
+        newData.append((255,255,255,maxAlpha))
       else:
         newData.append((255,255,255,0))
       x = x + 1
@@ -605,8 +606,8 @@ def Lip_Similar_with_point(source_color, compare_obj):
 
    return False
 def Eyebrow_Similar_with_point(source_color, compare_obj):
-  red_confidence = 40
-  confidence = 130
+  red_confidence = 20
+  confidence = 50
   sorce_r = source_color[0]
   sorce_g = source_color[1]
   sorce_b = source_color[2]
