@@ -249,11 +249,11 @@ def erase_layer(img,version, left_eyes_brow, right_eyes_brow, left_eyes, right_e
 
 
 
-def get_cheek_layer(cheek_ori, left_cheekpoint, right_cheekpoint, face_line, center_point, R,G,B):
+def get_cheek_layer(cheek_ori, left_cheekpoint, right_cheekpoint, face_line, center_point, R,G,B, max_alpha):
   Lx, Ly = GetIntersetLeftPoints2D(left_cheekpoint)
   Rx, Ry = GetIntersetRightPoints2D(right_cheekpoint)
   inter_val = 0.4 # 중심 값 이동 변수'
-  max_alpha = 40
+
   weight_X = 1.4 # X좌표 가중치. 값이 커질수록 X축기준 흐려짐 심함
   weight_Y = 1  # Y 좌표 가중치. 값이 커질수록 Y축기준 흐려짐 심함
   Left_facedot = []
@@ -473,7 +473,7 @@ def lower_cal_min_max_weight(fname,Cx,Cy,weight_X,weight_Y, center):
       x = 0
   return min(distance),max(distance)
 
-def get_lip_layer(imgname, mouse,R,G,B):
+def get_lip_layer(imgname, mouse,R,G,B, max_alpha):
   img = cv2.imread(imgname)
   img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
   mouse_mask = np.zeros_like(img_gray)
@@ -483,7 +483,6 @@ def get_lip_layer(imgname, mouse,R,G,B):
   y = 0
   x_list=[]
   y_list=[]
-  max_alpha = 100
   for i in mouse:
     x_list.append(i[0])
     y_list.append(i[1])
@@ -1015,7 +1014,7 @@ def eyeshadow_masking(origin_src, out_addr):
 
 
 
-def eyebrow_masking(origin_src, out_addr,center_point,R,G,B):
+def eyebrow_masking(origin_src, out_addr,center_point,R,G,B,max_alpha):
   img = cv2.imread(origin_src)
   img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
   eyebrow_mask = np.zeros_like(img_gray)
@@ -1024,7 +1023,6 @@ def eyebrow_masking(origin_src, out_addr,center_point,R,G,B):
   faces = detector(img_gray)
   lp=[]
   rp =[]
-  max_alpha=20
   for face in faces:
     landmarks = predictor(img_gray, face)
     landmarks_points = []
@@ -1171,11 +1169,11 @@ def get_xy_from_landmark(landmarks, n):
   y = landmarks.part(n).y
   return (x,y)
 
-def eyeshadow_Extract(origin_src, out_addr,center_point,R,G,B):
+def eyeshadow_Extract(origin_src, out_addr,center_point,R,G,B,max_alpha):
   img = cv2.imread(origin_src)
   img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
   eyeshadow_mask = np.zeros_like(img_gray)
-  max_alpha = 85 #65 default
+  #65 default
   detector = dlib.get_frontal_face_detector()
   predictor = dlib.shape_predictor("shape_predictor_194_face_landmarks.dat")
   faces = detector(img_gray)
@@ -1592,13 +1590,12 @@ def accumulate_hair_layer():
 
   layer1.save("./hair_crop_transparent/crop_hair.png")
 
-def opened_mouse_layer(imgsrc,R,G,B):
+def opened_mouse_layer(imgsrc,R,G,B,maxalpha):
   img = cv2.imread(imgsrc)
   img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
   lip_mask = np.zeros_like(img_gray)
   weight_Y = 1
   weight_X = 0.4
-  maxalpha = 90
   detector = dlib.get_frontal_face_detector()
   predictor = dlib.shape_predictor("shape_predictor_194_face_landmarks.dat")
   faces = detector(img_gray)

@@ -12,12 +12,18 @@ import os
 # Picture FileName
 # Illust Flag => True이면 Cartoon GAN 적용 후 Face Layer 추출, False이면 미적용, 추출
 convert_to_illust = False
-Remove_BG=True
+Remove_BG=False
 Get_HairSeg=False
-R=255
-G=0
-B=0
 # color setting
+R=255
+G=255
+B=255
+# Alpha channel setting
+lip_maxalpha =90
+cheek_max_alpha = 40
+eyebrow_max_alpha = 20
+eyeshadow_max_alpha = 85
+lip_max_alpha = 100
 
 FileName = "mental.png"
 
@@ -40,7 +46,7 @@ version="2.0"
 modelpath = "./light_shinkai_ckpt"
 img_path = ImgName
 out_dir = './output/'
-U.opened_mouse_layer(img_Name, R,G,B)
+U.opened_mouse_layer(img_Name, R,G,B,lip_maxalpha)
 pattern_file = ["pattern1.png","pattern2.png","pattern3.png","pattern4.png","pattern5.png","pattern6.jpg"]
 
 print("Pattern List : ",end='')
@@ -198,8 +204,8 @@ while True:
     left_eyes_brow_img = U.extract_part(LEB_ori, left_eyes_brow)
     right_eyes_brow_img = U.extract_part(REB_ori, right_eyes_brow)
 
-  # visualize
-  U.get_cheek_layer(cheek_ori, points_for_leftcheek, points_for_rightcheek, face_line,points_for_nosecheek[0][0],R,G,B)
+  # visualize   max_alpha = 40
+  U.get_cheek_layer(cheek_ori, points_for_leftcheek, points_for_rightcheek, face_line,points_for_nosecheek[0][0],R,G,B,cheek_max_alpha)
   cv2.imwrite(out_dir+'cheek_colored'+version+'.png',cheek_ori)
   # Img Write
   cv2.imwrite(out_dir+'mouse'+version+'.png',mouse_img)
@@ -207,18 +213,20 @@ while True:
   cv2.imwrite(out_dir+'right_eyes_img'+version+'.png', right_eyes_img )
   cv2.imwrite(out_dir+'nose_img'+version+'.png', nose_img )
   cv2.imwrite(out_dir+'face_line_img'+version+'.png', face_line_img)
-  U.eyebrow_masking(img_path, './output/eyebrow' + version + '.png',points_for_nosecheek[0][0],R,G,B)
+
+  U.eyebrow_masking(img_path, './output/eyebrow' + version + '.png',points_for_nosecheek[0][0],R,G,B,eyebrow_max_alpha)
 
   cv2.imwrite(out_dir+'left_eyes_brow_img'+version+'.png', left_eyes_brow_img )
   cv2.imwrite(out_dir+'right_eyes_brow_img'+version+'.png', right_eyes_brow_img )
-  U.eyeshadow_Extract(img_path, './output/eyeshadow_modified' + version + '.png', points_for_nosecheek[0][0],R,G,B)
+  U.eyeshadow_Extract(img_path, './output/eyeshadow_modified' + version + '.png', points_for_nosecheek[0][0],R,G,B,eyeshadow_max_alpha)
   print("mouse Layer Extract [Path] : " + out_dir+'mouse'+version+'.png')
   print("left_eyes_img Layer Extract [Path] : " + out_dir+'left_eyes_img'+version+'.png')
   print("right_eyes_img Layer Extract [Path] : " + out_dir+'right_eyes_img'+version+'.png')
   print("nose_img Layer Extract [Path] : " + out_dir+'nose_img'+version+'.png')
   print("face_line_img Layer Extract [Path] : " + out_dir+'face_line_img'+version+'.png')
   lip_fname = out_dir+'mouse'+version+'.png'
-  U.get_lip_layer(ImgName,mouse,R,G,B)
+
+  U.get_lip_layer(ImgName,mouse,R,G,B,lip_max_alpha)
 
   U.get_eyebrow_layer(ImgName, left_eyes_brow, right_eyes_brow)
 
