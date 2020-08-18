@@ -359,6 +359,26 @@ def cal_min_max(fname,Rx,Ry,Lx,Ly,center_point, B,G,R):
       x = 0
   return min(distance),max(distance)
 
+def cal_LR_min_max(fname,Rx,Ry,Lx,Ly,center_point, B,G,R):
+  img = Image.open(fname)
+  opencv_img = cv2.imread(fname)
+  width = opencv_img.shape[1]
+  img = img.convert("RGBA")
+  x = -1
+  y = 0
+  datas = img.getdata()
+  L_distance=[]
+  R_distance=[]
+  for item in datas:
+    x = x + 1
+    if (item[0] == 255 and item[1] == 0 and item[2] == 0  and item[3] == 255 and x < center_point):
+      L_distance.append(math.sqrt((((Lx-x)**2)+((Ly-y)**2))))
+    elif (item[0] == 255 and item[1] ==0 and item[2] == 0 and item[3] == 255 and x >= center_point):
+      R_distance.append(math.sqrt((((Rx-x)**2)+((Ry-y)**2))))
+    if (x >= width):
+      y = y + 1
+      x = 0
+  return min(L_distance),max(L_distance),min(R_distance),max(R_distance)
 
 def eyebrow_cal_min_max(fname,Rx,Ry,Lx,Ly,center_point):
   img = Image.open(fname)
@@ -529,7 +549,7 @@ def get_lip_layer(imgname, mouse,R,G,B, max_alpha):
     print("lip  Layer Extract [Path] : ./output/lip_layer.png")
     img.save(imgname, "PNG")
 
-def get_eyebrow_layer(imgname, lefteyebrow, righteyebrow, maxAlpha):
+def get_eyebrow_layer(imgname, lefteyebrow, righteyebrow, maxAlpha,R,G,B):
   x = -1
   y = 0
   l_x_list=[]
@@ -573,9 +593,9 @@ def get_eyebrow_layer(imgname, lefteyebrow, righteyebrow, maxAlpha):
 
     for item in datas:
       if((is_in_Area(x,y,lefteyebrowmin_x,lefteyebrowmax_x,lefteyebrowmin_y,lefteyebrowmax_y) and Eyebrow_Similar_with_point(left_center_eyebrow_color, item))):
-        newData.append((255,255,255,maxAlpha))
+        newData.append((R,G,B,maxAlpha))
       elif((is_in_Area(x, y, righteyebrowmin_x, righteyebrowmax_x, righteyebrowmin_y, righteyebrowmax_y) and (Eyebrow_Similar_with_point(right_center_eyebrow_color, item)))):
-        newData.append((255,255,255,maxAlpha))
+        newData.append((R,G,B,maxAlpha))
       else:
         newData.append((255,255,255,0))
       x = x + 1
@@ -606,7 +626,7 @@ def Lip_Similar_with_point(source_color, compare_obj):
 
    return False
 def Eyebrow_Similar_with_point(source_color, compare_obj):
-  red_confidence = 20
+  red_confidence = 40
   confidence = 50
   sorce_r = source_color[0]
   sorce_g = source_color[1]
@@ -1022,6 +1042,8 @@ def eyebrow_masking(origin_src, out_addr,center_point,R,G,B,max_alpha):
   detector = dlib.get_frontal_face_detector()
   predictor = dlib.shape_predictor("shape_predictor_194_face_landmarks.dat")
   faces = detector(img_gray)
+  weight_X = 0.8
+  weight_Y = 4
   lp=[]
   rp =[]
   for face in faces:
@@ -1144,16 +1166,16 @@ def eyebrow_masking(origin_src, out_addr,center_point,R,G,B,max_alpha):
   y = 0
   datas = img.getdata()
   newData = []
-  min_val, max_val = cal_min_max(out_addr, alpha_right[0], alpha_right[1], alpha_left[0], alpha_left[1], center_point,B,G,R)  # 정규화를 위한 최대 최소 계산
+  Lmin_val,Lmax_val,Rmin_val,Rmax_val = cal_LR_min_max(out_addr, alpha_right[0], alpha_right[1], alpha_left[0], alpha_left[1], center_point,B,G,R)  # 정규화를 위한 최대 최소 계산
   for item in datas:
     x = x + 1
     if (item[0] == 255 and item[1] == 0 and item[2] == 0 and item[3] == 255 and x < center_point):
-      distance = math.sqrt(((alpha_left[0] - x)*0.6) ** 2 + ((alpha_left[1] - y)*4) ** 2)
-      newData.append((R, G, B,int(max_alpha - normalization(distance, max_val, min_val) * 100)))  # 거리비례 정규화 역순
+      distance = math.sqrt((((alpha_left[0] - x)*weight_X) ** 2) + (((alpha_left[1] - y)*weight_Y) ** 2))
+      newData.append((R, G, B,int(max_alpha - normalization(distance, Lmax_val, Lmin_val) * 100)))  # 거리비례 정규화 역순
 
     elif (item[0] == 255 and item[1] == 0 and item[2] == 0 and item[3] == 255 and x >= center_point):
-      distance = math.sqrt(((alpha_right[0] - x)*0.6) ** 2 + ((alpha_right[1] - y)*4) ** 2)
-      newData.append((R, G, B, int(max_alpha - normalization(distance, max_val, min_val) * 100)))
+      distance = math.sqrt((((alpha_right[0] - x)*weight_X) ** 2) + (((alpha_right[1] - y)*weight_Y) ** 2))
+      newData.append((R, G, B, int(max_alpha - normalization(distance, Rmax_val, Rmin_val) * 100)))
     else:
       newData.append((255, 255, 255, 0))
     if (x >= width):

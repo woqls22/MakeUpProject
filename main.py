@@ -11,16 +11,16 @@ import os
 def start():
   # Illust Flag => True이면 Cartoon GAN 적용 후 Face Layer 추출, False이면 미적용, 추출
   convert_to_illust = False
-  Remove_BG = False
+  Remove_BG = True
   Get_HairSeg = False
   # color setting
   R = 255
-  G = 255
-  B = 255
+  G = 0
+  B = 0
   # Alpha channel setting
   lip_maxalpha = 90
-  cheek_max_alpha = 25
-  eyebrow_max_alpha = 100
+  cheek_max_alpha = 50
+  eyebrow_max_alpha = 80
   eyeshadow_max_alpha = 85
   lip_max_alpha = 100
 
@@ -232,7 +232,7 @@ def start():
 
     U.get_lip_layer(ImgName, mouse, R, G, B, lip_max_alpha)
 
-    U.get_eyebrow_layer(ImgName, left_eyes_brow, right_eyes_brow, eyebrow_max_alpha)
+    U.get_eyebrow_layer(ImgName, left_eyes_brow, right_eyes_brow, eyebrow_max_alpha,R,G,B)
 
     x = []
     y = []
