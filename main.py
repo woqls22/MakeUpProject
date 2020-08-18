@@ -21,7 +21,7 @@ def start():
   lip_maxalpha = 90
   cheek_max_alpha = 50
   eyebrow_max_alpha = 80
-  eyeshadow_max_alpha = 85
+  eyeshadow_max_alpha = 100
   lip_max_alpha = 100
 
   FileName = "mental.png"
@@ -58,6 +58,7 @@ def start():
   face_sizes = []
   U.eyemasking(img_path, './output/eye' + version + '.png')
   U.eyeshadow_masking(img_path, './output/eyeshadow' + version + '.png')
+  U.eyebrow(img_path,R,G,B)
   while True:
     img = cv2.imread(ImgName)
     print("Input Image : " + ImgName)
